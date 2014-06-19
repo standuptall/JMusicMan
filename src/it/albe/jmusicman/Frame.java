@@ -19,6 +19,7 @@ import org.jdom.Element;
 import org.jdom.filter.ElementFilter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import com.mpatric.mp3agic.*;
 
 /**
  *
@@ -99,6 +100,8 @@ public class Frame extends javax.swing.JFrame{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        modificaPopumMenu = new javax.swing.JMenuItem();
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTree1 = new javax.swing.JTree();
@@ -118,6 +121,14 @@ public class Frame extends javax.swing.JFrame{
         infoMenu = new javax.swing.JMenu();
         aboutItem = new javax.swing.JMenuItem();
 
+        modificaPopumMenu.setLabel("Modifica...");
+        modificaPopumMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modificaPopumMenuActionPerformed(evt);
+            }
+        });
+        jPopupMenu1.add(modificaPopumMenu);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("JMusicMan");
         setResizable(false);
@@ -133,6 +144,11 @@ public class Frame extends javax.swing.JFrame{
 
         jSplitPane1.setLeftComponent(jScrollPane1);
 
+        jList1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                Frame.this.mouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(jList1);
 
         jSplitPane1.setRightComponent(jScrollPane2);
@@ -346,6 +362,57 @@ public class Frame extends javax.swing.JFrame{
         }
             
     }//GEN-LAST:event_impostaPlayerMenuItemActionPerformed
+    /*
+     * Evento appartenente al menù contestuale della lista
+     * 
+     */
+    private void mouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mouseClicked
+        Track track = null;
+        try{
+            if (evt.getButton()==3){
+                jList1.setSelectedIndex(jList1.locationToIndex(evt.getPoint()));
+                track = (Track)jList1.getSelectedValue();
+                jPopupMenu1.show(this.jList1,evt.getX(),evt.getY());
+            }
+        }
+        catch (Exception e){
+            
+        }
+    }//GEN-LAST:event_mouseClicked
+    /*
+     * Evento appartenente al menù contestuale della lista
+     */
+    private void modificaPopumMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modificaPopumMenuActionPerformed
+        EditInfo dialog = new EditInfo(this,true,(Track)jList1.getSelectedValue());
+        dialog.setVisible(true);
+        if (dialog.getResponse()==1){
+            try{
+                Track track = dialog.getTrack();
+                Mp3File mp3file = new Mp3File(track.getPath());
+                ID3v2 id3;
+                if (mp3file.hasId3v2Tag()) {
+                    id3 = mp3file.getId3v2Tag();
+                    } else {
+                      // mp3 does not have an ID3v2 tag, let's create one..
+                      id3 = new ID3v24Tag();
+                      mp3file.setId3v2Tag(id3);
+                      }
+                id3.setAlbum(track.getAlbum());
+                id3.setTitle(track.getName());
+                id3.setArtist(track.getArtist());
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3");
+                mp3file.save(newTrack.getPath());
+                File file = new File(track.getPath());
+                file.delete();
+                JMusicMan.organize(new File(track.getPath()), track.getArtist(), track.getAlbum(), track.getName(), 0);
+                JMusicMan.update();
+            }
+            catch (Exception e){
+                
+            }
+            dialog.dispose();
+        }
+    }//GEN-LAST:event_modificaPopumMenuActionPerformed
 
     /**
      * @param args the command line arguments
@@ -390,6 +457,7 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenu infoMenu;
     private javax.swing.JList jList1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPopupMenu jPopupMenu1;
     public javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -397,6 +465,7 @@ public class Frame extends javax.swing.JFrame{
     public javax.swing.JTree jTree1;
     public javax.swing.JLabel label;
     private javax.swing.JMenu libreriaMenu;
+    private javax.swing.JMenuItem modificaPopumMenu;
     private javax.swing.JMenuItem rilevaDispositivoMenuItem;
     private javax.swing.JMenuItem sincronizzaMenuItem;
     private javax.swing.JMenu sincronizzazioneMenu;
