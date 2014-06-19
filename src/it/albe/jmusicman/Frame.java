@@ -11,8 +11,6 @@ import java.util.Iterator;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
-import org.farng.mp3.*;
-import org.farng.mp3.id3.AbstractID3v2Frame;
 import java.io.*;
 import javax.swing.UIManager;
 import org.jdom.input.*;
