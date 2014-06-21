@@ -65,6 +65,7 @@ public class JMusicMan {
                     while (iterator3.hasNext()){
                         Element track = (Element)iterator3.next();
                         Album alb = (Album)albumNode.getUserObject();
+                       
                         alb.addTrack(new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path")));
                     }
                     

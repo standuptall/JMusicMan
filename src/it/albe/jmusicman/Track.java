@@ -5,6 +5,7 @@ package it.albe.jmusicman;
 public class Track {
     private String name, artist,album,path;
     private int Duration,number;
+    private Byte[] img;
     public Track () {
 
     }
@@ -14,6 +15,13 @@ public class Track {
         this.album = album;
         this.path = path;
     
+    }
+    public Track(String artista, String nome, String album,String path,Byte[] img) {
+        this.name = nome;
+        this.artist = artista;
+        this.album = album;
+        this.path = path;
+        this.img = img;
     }
     public Track(String artista, String nome, String album,int count) {
         this.name = nome;
@@ -32,7 +40,9 @@ public class Track {
     public String getAlbum() {
         return album;
     }
-
+    public Byte[] getImg(){
+        return img;
+    }
     public void setAlbum(String Album) {
         this.album = Album;
     }

@@ -4,8 +4,17 @@
  */
 package it.albe.jmusicman;
 
+import com.mpatric.mp3agic.*;
+import it.albe.utils.IO;
+import java.awt.event.MouseEvent;
+import javax.swing.*;
+import java.awt.datatransfer.*;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.awt.Graphics;
 /**
- *
+ 
  * @author Alberto
  */
 public class EditInfo extends javax.swing.JDialog {
@@ -23,6 +32,96 @@ public class EditInfo extends javax.swing.JDialog {
         albumField.setText(track.getAlbum());
         titleField.setText(track.getName());
         trackNumberField.setText(Integer.toString(track.getNumber()));
+        try{
+            Mp3File mp3 = new Mp3File(track.getPath());
+            ID3v2 ID3 = mp3.getId3v2Tag();
+            byte[] img = ID3.getAlbumImage();
+            javax.swing.ImageIcon image = new javax.swing.ImageIcon(img);
+            final JLabel label = new JLabel(image);
+            
+            java.awt.event.ActionListener menuListener = new java.awt.event.ActionListener() {
+                
+                public void actionPerformed(java.awt.event.ActionEvent event) {
+                    if (event.getActionCommand().equals("Incolla")){
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        Transferable contents = clipboard.getContents(null);
+                        java.awt.Image image;
+                        try {
+                        if (contents!=null)
+                            if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)){
+                                image = (java.awt.Image)contents.getTransferData(DataFlavor.imageFlavor);
+                                label.setIcon(new javax.swing.ImageIcon(image));
+                                jScrollPane2.setViewportView(label);
+                            }
+                        }
+                        catch (Exception e){
+                            
+                        }
+                    }
+                    if (event.getActionCommand().equals("Copia")){
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        ImageIcon imageIcon = (ImageIcon)label.getIcon();
+                        TransferableImage transferable= new TransferableImage(imageIcon.getImage());
+                        clipboard.setContents(transferable, null);
+                    }
+                }
+            };
+            
+            final JPopupMenu popup = new JPopupMenu();
+            JMenuItem item = new JMenuItem("Copia");
+            item.addActionListener(menuListener);
+            popup.add(item);
+            item = new JMenuItem("Incolla");
+            item.addActionListener(menuListener);
+            popup.add(item);
+            label.addMouseListener(new javax.swing.event.MouseInputListener() {
+
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                    if (me.getButton()==3)
+                        popup.show(label,me.getX(),me.getY());
+                }
+
+                @Override
+                public void mousePressed(MouseEvent me) {
+                    
+                    
+                    
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent me) {
+                    
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent me) {
+                    
+                }
+
+                @Override
+                public void mouseExited(MouseEvent me) {
+                    
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent me) {
+                    
+                }
+
+                @Override
+                public void mouseMoved(MouseEvent me) {
+                    
+                }
+            });
+            jScrollPane2.setViewportView(label);
+        }
+        catch (Exception e){
+            
+        }
+        
+        
+        //Byte[] img = 
     }
     public Track getTrack(){
         return track;
@@ -101,18 +200,20 @@ public class EditInfo extends javax.swing.JDialog {
                     .addComponent(trackNumberField)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 182, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel1)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
-                            .addComponent(jLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jLabel5)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
                                 .addComponent(jLabel6)
-                                .addGap(0, 150, Short.MAX_VALUE))
-                            .addComponent(jScrollPane2)))
+                                .addGap(0, 65, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jScrollPane2))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(OKBUtton, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -123,7 +224,6 @@ public class EditInfo extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(artistField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -144,16 +244,15 @@ public class EditInfo extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(OKBUtton)
-                    .addComponent(annullaButton))
-                .addContainerGap())
+                        .addComponent(jScrollPane2)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(annullaButton)
+                    .addComponent(OKBUtton)))
         );
 
         pack();

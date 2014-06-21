@@ -385,7 +385,7 @@ public class Frame extends javax.swing.JFrame{
     private void modificaPopumMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modificaPopumMenuActionPerformed
         EditInfo dialog = new EditInfo(this,true,(Track)jList1.getSelectedValue());
         dialog.setVisible(true);
-        if (dialog.getResponse()==1){
+        if (dialog.getResponse()==1){   //se hai premuto OK...
             try{
                 Track track = dialog.getTrack();
                 Mp3File mp3file = new Mp3File(track.getPath());
@@ -393,13 +393,13 @@ public class Frame extends javax.swing.JFrame{
                 if (mp3file.hasId3v2Tag()) {
                     id3 = mp3file.getId3v2Tag();
                     } else {
-                      // mp3 does not have an ID3v2 tag, let's create one..
                       id3 = new ID3v24Tag();
                       mp3file.setId3v2Tag(id3);
                       }
                 id3.setAlbum(track.getAlbum());
                 id3.setTitle(track.getName());
                 id3.setArtist(track.getArtist());
+                
                 Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3");
                 mp3file.save(newTrack.getPath());
                 File file = new File(track.getPath());
