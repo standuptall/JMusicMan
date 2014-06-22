@@ -20,12 +20,18 @@ import java.awt.Graphics;
 public class EditInfo extends javax.swing.JDialog {
     private Track track;
     private int response;
+    public boolean artistModified, titleModified, albumModified, imageModified;
 
     /**
      * Creates new form EditInfo
      */
-    public EditInfo(java.awt.Frame parent, boolean modal, Track track) {
+    public EditInfo(java.awt.Frame parent, boolean modal, final Track track) {
+        
         super(parent, modal);
+        artistModified = false;
+        titleModified = false;
+        albumModified = false;
+        imageModified = false;
         this.track = track;
         initComponents();
         artistField.setText(track.getArtist());
@@ -52,6 +58,12 @@ public class EditInfo extends javax.swing.JDialog {
                                 image = (java.awt.Image)contents.getTransferData(DataFlavor.imageFlavor);
                                 label.setIcon(new javax.swing.ImageIcon(image));
                                 jScrollPane2.setViewportView(label);
+                                BufferedImage bimage = (BufferedImage)image;
+                                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream(); 
+                                javax.imageio.ImageIO.write(bimage, "png", baos); 
+                                byte[] res=baos.toByteArray();
+                                track.setImg(res);
+                                imageModified = true;
                             }
                         }
                         catch (Exception e){
@@ -64,6 +76,7 @@ public class EditInfo extends javax.swing.JDialog {
                         TransferableImage transferable= new TransferableImage(imageIcon.getImage());
                         clipboard.setContents(transferable, null);
                     }
+                   
                 }
             };
             
@@ -122,6 +135,9 @@ public class EditInfo extends javax.swing.JDialog {
         
         
         //Byte[] img = 
+    }
+    public EditResult editResult(){
+        return new EditResult(artistModified, titleModified,albumModified,imageModified);
     }
     public Track getTrack(){
         return track;
@@ -261,10 +277,21 @@ public class EditInfo extends javax.swing.JDialog {
     private void OKBUttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBUttonActionPerformed
         this.setVisible(false);
         response = 1;
-        track.setAlbum(albumField.getText());
-        track.setArtist(artistField.getText());
-        track.setName(titleField.getText());
-        //track.set(albumField.getText());
+        if (track.getAlbum().equals(albumField.getText())){
+            albumModified = true;
+            track.setAlbum(albumField.getText());
+        }
+        if (track.getArtist().equals(artistField.getText())){
+            artistModified = true;
+            track.setArtist(artistField.getText());
+        }
+        if (track.getName().equals(titleField.getText())){
+            titleModified = true;
+            track.setName(titleField.getText());
+        }
+        
+        
+        //image already handled in ActionListener, row 66
     }//GEN-LAST:event_OKBUttonActionPerformed
 
     private void annullaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annullaButtonActionPerformed

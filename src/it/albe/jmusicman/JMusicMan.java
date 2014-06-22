@@ -17,23 +17,28 @@ import javax.swing.UIManager;
 /**
  *
  * @author Alberto
+ * 
+ * Classe principale che contiene i metodi statici principali
+ * 
  */
 public class JMusicMan {
-    public static Element rootElement;
-    public static String directory = "C:\\Users\\Alberto\\Music\\";
+    public static Element rootElement;  //rootElement del documento XML
+    public static String directory = "C:\\Users\\Alberto\\Music\\";  
     public static Document document;
-    public static File root = null;
-    public static long lastedit;
-    public static String playerDir = "";
+    public static File root = null;      //root directory del dispositivo
+    public static long lastedit;         //timestamp dell'ultima modifica del file xml
+    public static String playerDir = ""; //directory del player
 
     public static Frame frame = new Frame();
     public static void main(String[] args) {
-        
         frame.setVisible(true);
         loadLibrary();
     }
+    /******************************************************************
+     * Carica la libreria XML e crea l'albero directory               *
+     ******************************************************************/
     public static void loadLibrary(){
-        SAXBuilder builder = new SAXBuilder();
+        SAXBuilder builder = new SAXBuilder();    
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicManLibrary");
         frame.jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)frame.jTree1.getModel().getRoot();
@@ -78,6 +83,10 @@ public class JMusicMan {
         
         frame.jTree1.expandRow(0);
     }
+    /************************************************************************************************
+     * Trova le tracce da copiare sul dispositivo confrontando le librerie sul PC e sul dispositivo.*
+     * In particolare confronta il "path"                                                           *
+     ************************************************************************************************/
     public static ArrayList<Track> findTracksToCopy(ArrayList<Element> disp, ArrayList<Element> locale){
         ArrayList<Track> lista = new ArrayList<Track>();
         String name, artist, album, path;
@@ -100,9 +109,9 @@ public class JMusicMan {
         }
         return lista;
     }
-    /*
-     * Trova le tracce che sono state eliminate dal PC e le elimina anche dal dispositivo
-     */
+    /*************************************************************************************
+     * Trova le tracce che sono state eliminate dal PC e le elimina anche dal dispositivo*
+     *************************************************************************************/
     public static int findTrackToDelete(ArrayList<Element> disp, ArrayList<Element> locale,String pathToDisp){
         
         String name, artist, album, path;
@@ -148,11 +157,9 @@ public class JMusicMan {
         }
         return fileEliminati;
     }
-    /*
-     * A dispetto del nome, in realtà oltre che ritornare l'elemento artista, crea una cartella col suo 
-     * 
-     * nome, se questa non esiste
-     */
+    /***************************************************************************************
+     *  crea una directory con il nome dell'artista, una con l'album e ci mette la canzone**
+     **************************************************************************************/
     
     public static void organize(File file,String artist,String album, String title, int track){
         File dir = new File(directory);
@@ -192,8 +199,10 @@ public class JMusicMan {
              /*controllo se c'è l'artista */
              while (iterator.hasNext()){
                  Element element = (Element)iterator.next();
-                 if (element.getAttributeValue("name").equals(artist))
+                 if (element.getAttributeValue("name").equals(artist)){
                      artistElement = element;
+                     break;
+                 }
              }
              /* se è stato trovato...*/
              if (artistElement != null) {
@@ -244,6 +253,10 @@ public class JMusicMan {
         }
         
     }
+    /********************************************************************************************************
+     * Trova tutti i files mp3 presenti nella cartella /Music del PC e li organizza nelle apposite cartelle,*
+     * ricreando pure il file XML                                                                           *
+     ********************************************************************************************************/
     public static void update(){
         rootElement = new Element("JMusicManLibrary");
         rootElement.setAttribute("version","0.1");
@@ -296,6 +309,29 @@ public class JMusicMan {
         }
         loadLibrary();
     }
+    /******************************************************************************
+     *    Aggiorna solo la traccia in questione, sapendo che sono stati modificati*
+     *    solo le informazioni in base a editInfo                                 *
+     ******************************************************************************/
+    public static void updateTrack(Track track,EditResult editInfo){
+        Element artist,album;
+        if (editInfo.artistModified()){
+            artist = findOrCreateArtist(track.getArtist());
+            album = findOrCreateAlbum(artist,track.getAlbum());
+            Element trackElement = new Element("track");
+            Element element = new Element("name");
+            element.setText(track.getName());
+            element = new Element("number");
+            element.setText(Integer.toString(track.getNumber()));
+            element = new Element("path");
+            element.setText(track.getPath());
+            album.addContent(element);                   
+        }
+        loadLibrary();
+    }
+    /***************************************************************
+     * Copia le tracce sul dispositivo                             *
+     ***************************************************************/
     public static void copyTracks(ArrayList<Track> tracks, String directory){
         int size = tracks.size();
         int progress = 0;
@@ -336,6 +372,9 @@ public class JMusicMan {
         }
         frame.label.setText("Pronto");
     }
+    /**************************************************
+     * Crea un documento XML vuoto                    *
+     **************************************************/
     public static void createEmptyDocument(File file){
         try{
             Element root = new Element("JMusicManLibrary");
@@ -359,7 +398,9 @@ public class JMusicMan {
         }
         
     }
-    
+    /************************************************************************
+     * Trova ricorsivamente tutti i file mp3 contenuti nella directory dir  *
+     ***********************************************************************/
     public static ArrayList<File> findFiles(String dir){
         File dirFile = new File (dir);
         File[] filesAndDirectories = null;
@@ -378,5 +419,38 @@ public class JMusicMan {
             }
         }
         return files;
+    }
+    /****************************************************************
+     * trova l'artista nel documento XML e, se non esiste, lo crea  *
+     ****************************************************************/
+    public static Element findOrCreateArtist(String artistName){
+        Element artist;
+        List artists = rootElement.getChild("library").getChildren();
+        Iterator<Element> iterator = artists.iterator();
+        while (iterator.hasNext()){
+            artist = iterator.next();
+            if (artist.getAttributeValue("name").equals(artistName))
+                return artist;
+        }
+        artist = new Element("artist");
+        artist.setAttribute("name",artistName);
+        rootElement.getChild("library").addContent(artist);
+        return artist;
+    }
+    /***************************************************************************
+     * trova l'album dell'artista nel documento XML e, se non esiste, lo crea  *
+     ***************************************************************************/
+    public static Element findOrCreateAlbum(Element artist,String albumName){
+        Element album;
+        List albums = artist.getChildren();
+        Iterator<Element> iterator = albums.iterator();
+        while(iterator.hasNext()){
+            album = iterator.next();
+            if (album.getAttributeValue("name").equals(albumName))
+                return album;
+        }
+        album = new Element("album");
+        album.setAttribute("name", albumName);
+        return album;
     }
 }

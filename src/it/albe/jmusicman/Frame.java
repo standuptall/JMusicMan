@@ -399,13 +399,14 @@ public class Frame extends javax.swing.JFrame{
                 id3.setAlbum(track.getAlbum());
                 id3.setTitle(track.getName());
                 id3.setArtist(track.getArtist());
+                id3.setAlbumImage(track.getImg(), "image/png");
                 
-                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3");
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3");//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
                 mp3file.save(newTrack.getPath());
                 File file = new File(track.getPath());
                 file.delete();
-                JMusicMan.organize(new File(track.getPath()), track.getArtist(), track.getAlbum(), track.getName(), 0);
-                JMusicMan.update();
+                //JMusicMan.organize(new File(track.getPath()), track.getArtist(), track.getAlbum(), track.getName(), 0);
+                JMusicMan.updateTrack(track, dialog.editResult());
             }
             catch (Exception e){
                 
