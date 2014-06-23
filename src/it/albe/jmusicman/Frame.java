@@ -65,7 +65,7 @@ public class Frame extends javax.swing.JFrame{
                     
             }
         });
-        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         jList1.getSelectionModel().addListSelectionListener(new javax.swing.event.ListSelectionListener() {
 
             @Override
@@ -129,9 +129,16 @@ public class Frame extends javax.swing.JFrame{
         jSplitPane1.setMinimumSize(new java.awt.Dimension(500, 250));
         jSplitPane1.setPreferredSize(new java.awt.Dimension(290, 324));
 
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.setAutoscrolls(true);
+        jScrollPane1.setDoubleBuffered(true);
+
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicManLibrary");
         jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        jTree1.setPreferredSize(new java.awt.Dimension(107, 160));
+        jTree1.setAutoscrolls(true);
+        jTree1.setMaximumSize(new java.awt.Dimension(107, 1000));
+        jTree1.setPreferredSize(new java.awt.Dimension(107, 600));
         jScrollPane1.setViewportView(jTree1);
 
         jSplitPane1.setLeftComponent(jScrollPane1);
@@ -396,8 +403,7 @@ public class Frame extends javax.swing.JFrame{
                 mp3file.save(newTrack.getPath());
                 File file = new File(track.getPath());
                 file.delete();
-                JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), 0);
-                /* Passo anche la vecchia traccia affinché possa eliminare l'elemento vecchio sul file xml */
+                JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), track.getNumber());
                 JMusicMan.updateTrack(newTrack, dialog.editResult());
             }
             catch (Exception e){

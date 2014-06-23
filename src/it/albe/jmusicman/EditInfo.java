@@ -20,7 +20,7 @@ import java.awt.Graphics;
 public class EditInfo extends javax.swing.JDialog {
     private Track track;
     private int response;
-    public boolean artistModified, titleModified, albumModified, imageModified;
+    public boolean artistModified, titleModified, albumModified, imageModified, trackModified;
 
     /**
      * Creates new form EditInfo
@@ -289,8 +289,9 @@ public class EditInfo extends javax.swing.JDialog {
             titleModified = true;
             track.setName(titleField.getText());
         }
-        if (!track.getName().equals(titleField.getText())){
-            track.setNumber(Integer.parseInt(titleField.getText()));
+        if (!Integer.toString(track.getNumber()).equals(trackNumberField.getText())){
+            trackModified = true;
+            track.setNumber(Integer.parseInt(trackNumberField.getText()));
         }
         
         

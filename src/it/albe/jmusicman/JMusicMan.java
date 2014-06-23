@@ -42,6 +42,7 @@ public class JMusicMan {
         SAXBuilder builder = new SAXBuilder();    
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicManLibrary");
         frame.jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)frame.jTree1.getModel().getRoot();
         try{
             document = builder.build(new File (directory+"JMusicManLibrary.xml"));
@@ -57,7 +58,14 @@ public class JMusicMan {
             while(iterator.hasNext()){
                 Element artist = (Element)iterator.next();
                 DefaultMutableTreeNode artistNode = new DefaultMutableTreeNode(artist.getAttributeValue("name"));
-                root.add(artistNode);
+                //Ordino alfabeticamente
+                if (root.getChildCount()>0)
+                    for (int i=0;i<root.getChildCount();i++){
+                        if (artist.getAttributeValue("name").compareTo(root.getChildAt(i).toString())>=0)
+                            root.insert(artistNode, i);
+                    }
+                else root.add(artistNode);
+                
                 List albums = artist.getChildren();
                 Iterator iterator2 = albums.iterator(); 
                 while(iterator2.hasNext()){
@@ -95,8 +103,9 @@ public class JMusicMan {
         catch (Exception e){
             IO.err(frame, "Errore nel caricare la libreria: "+e.toString());
         }
-        
+
         frame.jTree1.expandRow(0);
+        frame.jTree1.setSize(frame.getSize().width, frame.jTree1.getRowCount()*frame.jTree1.getRowHeight());
     }
     /************************************************************************************************
      * Trova le tracce da copiare sul dispositivo confrontando le librerie sul PC e sul dispositivo.*
@@ -303,29 +312,43 @@ public class JMusicMan {
                 frame.update(frame.getGraphics());
                 progress += step; 
                 frame.jProgressBar1.setValue(progress);
-                if (!file.isDirectory()&&file.getCanonicalPath().endsWith("mp3")){
-                    Mp3File mp3file = new Mp3File(file.getAbsolutePath());
-                    if (mp3file.hasId3v2Tag()){
-                        ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-                        artist = (id3v2Tag.getArtist()!=null) ? id3v2Tag.getArtist() : "Sconosciuto";
-                        album = (id3v2Tag.getAlbum()!=null) ? id3v2Tag.getAlbum() : "";
-                        title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
-                        track = (id3v2Tag.getTrack()!=null) ? Integer.valueOf(id3v2Tag.getTrack()) : 0;
-                        if (!"".equals(artist))
-                                organize(file,artist,album,title,track);
-                    }
+                Mp3File mp3file = new Mp3File(file.getAbsolutePath());
+                if (mp3file.hasId3v2Tag()){
+                    ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+                    artist = (id3v2Tag.getArtist()!=null) ? id3v2Tag.getArtist() : "Sconosciuto";
+                    album = (id3v2Tag.getAlbum()!=null) ? id3v2Tag.getAlbum() : "";
+                    title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
+                    if (artist.equals("Johannes Brahms"))
+                        track=0;
+                    track = (id3v2Tag.getTrack()!=null) ? Integer.parseInt(id3v2Tag.getTrack().replaceAll("[^0-9]", "")) : 0;
+                    if (!"".equals(artist))
+                            organize(file,artist,album,title,track);
+                }
+                else if (mp3file.hasId3v1Tag()){
+                    ID3v1 id3v1Tag = mp3file.getId3v2Tag();
+                    artist = (id3v1Tag.getArtist()!=null) ? id3v1Tag.getArtist() : "Sconosciuto";
+                    album = (id3v1Tag.getAlbum()!=null) ? id3v1Tag.getAlbum() : "";
+                    title = (id3v1Tag.getTitle()!=null) ? id3v1Tag.getTitle() : file.getName();
+                    track = (id3v1Tag.getTrack()!=null) ? Integer.valueOf(id3v1Tag.getTrack()) : 0;
+                    if (!"".equals(artist))
+                            organize(file,artist,album,title,track);
+                }
                         
                     
-                }
+                
             }
         frame.jProgressBar1.setString("Pronto");
         }
         catch(IOException e){
             IO.err(frame, "Errore nell'aggiornare la libreria: "+e.toString());
         }
+        catch(java.lang.NumberFormatException e){
+            IO.err(frame, "errore: "+e.getMessage()+artist);
+        }
         catch(Exception e){
             IO.err(frame, "errore: "+e.getMessage()+artist);
         }
+        
         loadLibrary();
     }
     /******************************************************************************
@@ -334,7 +357,7 @@ public class JMusicMan {
      ******************************************************************************/
     public static void updateTrack(Track newTrack,EditResult editInfo){
         Element artist,album;
-        if (editInfo.artistModified()){
+        if (editInfo.artistModified()||editInfo.albumModified()||editInfo.titleModified()){
             artist = findOrCreateArtist(newTrack.getArtist());
             album = findOrCreateAlbum(artist,newTrack.getAlbum());
             Element trackElement = new Element("track");
@@ -350,10 +373,8 @@ public class JMusicMan {
             trackElement.addContent(element);
             while (deleteOrphansFiles())
                 ;
-            
             while (deleteOrphansElements())
                 ;
-                
         }
         try {
             java.util.Date data = new java.util.Date();
@@ -495,16 +516,18 @@ public class JMusicMan {
         boolean deleted = false;
         try{
             /*trovo elementi che non hanno child */
-            iterator = rootElement.getDescendants(filter);
+            iterator = rootElement.getChild("library").getDescendants(filter);
             while(iterator.hasNext()){
                 element = iterator.next();
                 if (element.getAttributeValue("name")!=null)
                     if (element.getAttributeValue("name").equals("Vivo da Re"))
                         c=0;
-                if (element.getChildren().isEmpty()){
-                    element.detach();
-                    return true;
-                }
+                if (element.getChildren().isEmpty())
+                    if (element.getText()!=null)
+                        if (element.getText().replaceAll("\n ", "").trim().equals("")){
+                            element.detach();
+                            return true;
+                        }
                     
             }
         }
@@ -528,7 +551,7 @@ public class JMusicMan {
                         files.addAll(findFiles(filesAndDirectories[i].getAbsolutePath()));
                 }
                 else {
-                    if (filesAndDirectories[i].getAbsolutePath().endsWith("mp3"))
+                    if (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith("MP3"))
                         files.add(filesAndDirectories[i]);
                 }
             }

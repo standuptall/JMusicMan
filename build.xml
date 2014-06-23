@@ -7,9 +7,25 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
+
 <project name="JMusicMan" default="default" basedir=".">
     <description>Builds, tests, and runs the project JMusicMan.</description>
     <import file="nbproject/build-impl.xml"/>
+    <target name ="-pre-init">
+    <property name="project.name" value="JMusicMan" />
+    <property name="version.num" value="0.1.2"/>
+    <tstamp>
+        <format property="NOW" pattern="yyyy-MM-dd HH:mm:ss" />
+    </tstamp>
+    <manifest file="MANIFEST.MF">
+        <attribute name="Bundle-Name" value="${project.name}" />
+        <attribute name="Bundle-Version" value="${version.num}"/>
+        <attribute name="Bundle-Date" value="${NOW}"/>
+        <attribute name="Implementation-Title" value="${project.name}" />
+        <attribute name="Implementation-Version" value="0.1.2"/>
+        <attribute name="Implementation-URL" value="http://newbufferedwriter.blogspot.org"/>
+    </manifest>
+</target>
     <!--
 
     There exist several targets which are by default empty and which can be 
