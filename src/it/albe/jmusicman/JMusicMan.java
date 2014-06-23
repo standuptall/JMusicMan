@@ -14,6 +14,7 @@ import javax.swing.tree.*;
 import com.mpatric.mp3agic.*;
 import java.util.ArrayList;
 import javax.swing.UIManager;
+import org.jdom.filter.ElementFilter;
 /**
  *
  * @author Alberto
@@ -70,15 +71,29 @@ public class JMusicMan {
                     while (iterator3.hasNext()){
                         Element track = (Element)iterator3.next();
                         Album alb = (Album)albumNode.getUserObject();
-                       
-                        alb.addTrack(new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path")));
+                        int number = (track.getChild("number")!=null) ? Integer.parseInt(track.getChild("number").getText()) : 0;
+                        alb.addTrack(new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path"),number));
                     }
                     
                  }
              }
+            frame.jProgressBar1.setStringPainted(true);
+            frame.jProgressBar1.setString("Pronto");
+            File[] roots = File.listRoots();
+            for (int i=0;i<roots.length;i++){
+                File file = new File(roots[i]+"\\.is_audio_player");
+                if (file.exists()){
+                    JMusicMan.root = roots[i];
+                    break;
+                }
+            }
+            if (JMusicMan.root==null)
+                frame.label.setText("Dispositivo non rilevato");
+            else 
+                frame.label.setText(JMusicMan.root.getAbsolutePath());
         }
         catch (Exception e){
-            
+            IO.err(frame, "Errore nel caricare la libreria: "+e.toString());
         }
         
         frame.jTree1.expandRow(0);
@@ -90,6 +105,7 @@ public class JMusicMan {
     public static ArrayList<Track> findTracksToCopy(ArrayList<Element> disp, ArrayList<Element> locale){
         ArrayList<Track> lista = new ArrayList<Track>();
         String name, artist, album, path;
+        int number;
         int sizel = locale.size();
         int sized = disp.size();
         int c;
@@ -104,7 +120,8 @@ public class JMusicMan {
                 artist = locale.get(i).getParentElement().getParentElement().getAttributeValue("name");
                 album = locale.get(i).getParentElement().getAttributeValue("name");
                 path = locale.get(i).getChild("path").getText();
-                lista.add(new Track(artist,name,album,path));
+                number = (locale.get(i).getChild("number")!=null) ? Integer.parseInt(locale.get(i).getChild("number").getText()) : 0;
+                lista.add(new Track(artist,name,album,path,number));
             }
         }
         return lista;
@@ -159,19 +176,18 @@ public class JMusicMan {
     }
     /***************************************************************************************
      *  crea una directory con il nome dell'artista, una con l'album e ci mette la canzone**
+     *  file: file originale con posizione originale                                       *
      **************************************************************************************/
     
     public static void organize(File file,String artist,String album, String title, int track){
-        File dir = new File(directory);
         String fileTitle;
         if (track!=0) 
-            fileTitle = String.format("%02d",track) +" - "+title+".mp3";
-        
+            fileTitle = String.format("%02d",track) +" - "+checkFileName(title)+".mp3";
         else 
-            fileTitle = title+".mp3";
-        File mp3file = new File(directory+artist+"\\"+album);
+            fileTitle = checkFileName(title)+".mp3";
+        File mp3file = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
         mp3file.mkdirs();
-        mp3file = new File(directory+artist+"\\"+album+"\\"+fileTitle);
+        mp3file = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
         try{
             if (mp3file.createNewFile()){
                 mp3file.delete();
@@ -186,9 +202,12 @@ public class JMusicMan {
              file.delete();
              writer.close();
             }
+            else {
+                
+            }
         }
         catch(IOException e){
-            
+            IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
         }
         try{
             List artists =rootElement.getChild("library").getChildren();
@@ -246,10 +265,11 @@ public class JMusicMan {
             rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
             XMLOutputter xmlOutput = new XMLOutputter();
             xmlOutput.setFormat(Format.getPrettyFormat());
+            document.setRootElement(rootElement);
             xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
         }
         catch(IOException e){
-            
+            IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
         }
         
     }
@@ -276,10 +296,9 @@ public class JMusicMan {
             ArrayList<File> files = findFiles(directory);
             int progress = 0;
             int step = 100/(files.size()+1);
-            
-            frame.label.setText("Sto elaborando...");
+            frame.jProgressBar1.setStringPainted(true);
             for (File file :files){
-                frame.jProgressBar1.setStringPainted(true);
+                
                 frame.jProgressBar1.setString(file.getAbsolutePath());
                 frame.update(frame.getGraphics());
                 progress += step; 
@@ -299,10 +318,10 @@ public class JMusicMan {
                     
                 }
             }
-        frame.label.setText("Pronto");
+        frame.jProgressBar1.setString("Pronto");
         }
         catch(IOException e){
-            e.printStackTrace();
+            IO.err(frame, "Errore nell'aggiornare la libreria: "+e.toString());
         }
         catch(Exception e){
             IO.err(frame, "errore: "+e.getMessage()+artist);
@@ -313,19 +332,40 @@ public class JMusicMan {
      *    Aggiorna solo la traccia in questione, sapendo che sono stati modificati*
      *    solo le informazioni in base a editInfo                                 *
      ******************************************************************************/
-    public static void updateTrack(Track track,EditResult editInfo){
+    public static void updateTrack(Track newTrack,EditResult editInfo){
         Element artist,album;
         if (editInfo.artistModified()){
-            artist = findOrCreateArtist(track.getArtist());
-            album = findOrCreateAlbum(artist,track.getAlbum());
+            artist = findOrCreateArtist(newTrack.getArtist());
+            album = findOrCreateAlbum(artist,newTrack.getAlbum());
             Element trackElement = new Element("track");
+            album.addContent(trackElement);
             Element element = new Element("name");
-            element.setText(track.getName());
+            element.setText(newTrack.getName());
+            trackElement.addContent(element);
             element = new Element("number");
-            element.setText(Integer.toString(track.getNumber()));
+            element.setText(Integer.toString(newTrack.getNumber()));
+            trackElement.addContent(element);
             element = new Element("path");
-            element.setText(track.getPath());
-            album.addContent(element);                   
+            element.setText(newTrack.getPath());
+            trackElement.addContent(element);
+            while (deleteOrphansFiles())
+                ;
+            
+            while (deleteOrphansElements())
+                ;
+                
+        }
+        try {
+            java.util.Date data = new java.util.Date();
+            rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
+            XMLOutputter xmlOutput = new XMLOutputter();
+            xmlOutput.setFormat(Format.getPrettyFormat());
+            document.setRootElement(rootElement);
+            xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
+            int  c=0;
+        }
+        catch (Exception e){
+            IO.err(frame, "Errore nell'aggiornare la traccia:"+e.toString());
         }
         loadLibrary();
     }
@@ -336,7 +376,7 @@ public class JMusicMan {
         int size = tracks.size();
         int progress = 0;
         int step = 100/size;
-        frame.label.setText("Copio tracce...");
+        frame.jProgressBar1.setString("Copio tracce...");
         for (int i=0;i<size;i++){
             String path =tracks.get(i).getPath();
             frame.jProgressBar1.setStringPainted(true);
@@ -364,13 +404,14 @@ public class JMusicMan {
                 writer.close();
             }
             catch(Exception e){
-                
+                IO.err(frame, "Errore nel copiare i dati sul dispositivo:"+e.toString());
+        
             }
             progress += step;
             frame.jProgressBar1.setValue(progress);
             frame.update(frame.getGraphics());
         }
-        frame.label.setText("Pronto");
+        //frame.label.setText("Pronto");
     }
     /**************************************************
      * Crea un documento XML vuoto                    *
@@ -394,9 +435,83 @@ public class JMusicMan {
         }
         
         catch(Exception e){
-            
+            IO.err(frame, "Errore nello scrivere i dati sul disco:"+e.toString());
+        
         }
         
+    }
+    
+    public static String checkFileName(String fileName){
+        /*if (fileName.contains("\\")||fileName.contains("/")||fileName.contains(":")||fileName.contains("*")
+                ||fileName.contains("?")||fileName.contains("\"")||fileName.contains("<")||fileName.contains(">")
+                ||fileName.contains("|")){*/
+            char[] array = fileName.toCharArray();
+            char c;
+            for(int i=0;i<array.length;i++){
+                c = array[i];
+                if (c=='\\'||c=='/'||c==':'||c=='*'||c=='?'||c=='\"'||c=='<'||c=='>'||c=='|'||c=='\t')
+                    array[i] = '_';
+            }
+            return String.copyValueOf(array);
+        }
+    
+    /**********************************************************************************
+     *   Cancella tutti le track che non esistono sul disco,                          *
+     * Ritorna true se è stato eliminato un elemento                                  *
+     * ********************************************************************************/
+    public static boolean deleteOrphansFiles(){
+        ElementFilter filter = new ElementFilter();
+        Iterator<Element> iterator = rootElement.getDescendants(filter);
+        Element element;
+        int c;
+        boolean deleted = false;
+        try{
+            /*trovo tracce che non esistono */
+            while(iterator.hasNext()){
+            element = iterator.next();
+            if (element.getName().equals("track"))
+                if (element.getChild("path")!=null)
+                    if (!(new File(element.getChild("path").getText())).exists()){   //se il file non esiste...
+                        element.detach();
+                        return true;
+                }
+            }
+            
+        }
+        catch(Exception e){
+            IO.err(frame, "Errore nell'eliminare gli elementi orfani della libreria:"+ e.toString());
+        }
+        return false;
+    }
+    /**********************************************************************************
+     *   Elimina gli eventuali elementi orfani.                                       *
+     *   Ritorna true se è stato eliminato un elemento                                 *
+     * ********************************************************************************/
+    public static boolean deleteOrphansElements(){
+        ElementFilter filter = new ElementFilter();
+        Iterator<Element> iterator = rootElement.getChild("library").getDescendants(filter);
+        Element element;
+        int c;
+        boolean deleted = false;
+        try{
+            /*trovo elementi che non hanno child */
+            iterator = rootElement.getDescendants(filter);
+            while(iterator.hasNext()){
+                element = iterator.next();
+                if (element.getAttributeValue("name")!=null)
+                    if (element.getAttributeValue("name").equals("Vivo da Re"))
+                        c=0;
+                if (element.getChildren().isEmpty()){
+                    element.detach();
+                    return true;
+                }
+                    
+            }
+        }
+        catch (Exception e){
+            IO.err(frame, "Errore nell'eliminare gli elementi orfani della libreria:"+ e.toString());
+        }
+        return false;
     }
     /************************************************************************
      * Trova ricorsivamente tutti i file mp3 contenuti nella directory dir  *

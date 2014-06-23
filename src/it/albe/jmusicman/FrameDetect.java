@@ -97,6 +97,7 @@ public class FrameDetect extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         it.albe.jmusicman.JMusicMan.root = (File)jList1.getSelectedValue();
+        JMusicMan.frame.label.setText(JMusicMan.root.getAbsolutePath());
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 

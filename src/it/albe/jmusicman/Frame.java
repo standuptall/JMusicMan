@@ -36,7 +36,8 @@ public class Frame extends javax.swing.JFrame{
            javax.swing.SwingUtilities.updateComponentTreeUI(this);
         }
         catch (Exception e){
-            
+            IO.err(this, "Errore nel settare il look and feel:"+e.toString());
+        
         }
         initComponents();
         this.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width)/2 - this.getWidth()/2, (Toolkit.getDefaultToolkit().getScreenSize().height)/2 - this.getHeight()/2);
@@ -69,23 +70,14 @@ public class Frame extends javax.swing.JFrame{
 
             @Override
             public void valueChanged(ListSelectionEvent lse) {
-                Track track = (Track)jList1.getSelectedValue();
-                try{
-                    /*
-                    MP3File mp3file = new MP3File(new java.io.File(track.getPath()));
-                    if (mp3file.hasID3v2Tag()){
-                        org.farng.mp3.id3.AbstractID3v2 id3 =  mp3file.getID3v2Tag();
-                        Iterator iterator = id3.getFrameIterator();
-                        while(iterator.hasNext()){
-                            AbstractID3v2Frame frame = (AbstractID3v2Frame)iterator.next();
-                            IO.confirm(null, frame.toString());
-                        }
-                        * 
-                    }*/
-                    Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
-                }
-                catch(Exception e){
-                    
+                if (!lse.getValueIsAdjusting()){
+                    Track track = (Track)jList1.getSelectedValue();
+                    try{
+                        Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
+                    }
+                    catch(Exception e){
+                        IO.err(null, "Errore nell'eseguire il player:"+e.toString());
+                    }
                 }
             }
         });
@@ -152,8 +144,6 @@ public class Frame extends javax.swing.JFrame{
         jScrollPane2.setViewportView(jList1);
 
         jSplitPane1.setRightComponent(jScrollPane2);
-
-        label.setText("Pronto");
 
         libreriaMenu.setText("Libreria");
         libreriaMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -328,7 +318,8 @@ public class Frame extends javax.swing.JFrame{
                 }
             }
             catch (Exception e){
-                
+                IO.err(this, "Errore durante la sincronizzazione:"+e.toString());
+        
             }
         }
         else IO.err(this, "Imposta prima il dispositivo!");
@@ -355,7 +346,7 @@ public class Frame extends javax.swing.JFrame{
                     xmlOutput.output(JMusicMan.document,new FileWriter(JMusicMan.directory+"JMusicManLibrary.xml"));
                 }
                 catch (Exception e){
-                    int c=0;
+                    IO.err(this, "Errore nello impostare il player:"+e.toString());
                 }
              }
                 
@@ -400,16 +391,17 @@ public class Frame extends javax.swing.JFrame{
                 id3.setTitle(track.getName());
                 id3.setArtist(track.getArtist());
                 id3.setAlbumImage(track.getImg(), "image/png");
-                
-                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3");//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
+                id3.setTrack(Integer.toString(track.getNumber()));
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
                 mp3file.save(newTrack.getPath());
                 File file = new File(track.getPath());
                 file.delete();
-                //JMusicMan.organize(new File(track.getPath()), track.getArtist(), track.getAlbum(), track.getName(), 0);
-                JMusicMan.updateTrack(track, dialog.editResult());
+                JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), 0);
+                /* Passo anche la vecchia traccia affinché possa eliminare l'elemento vecchio sul file xml */
+                JMusicMan.updateTrack(newTrack, dialog.editResult());
             }
             catch (Exception e){
-                
+                System.out.print(e.getMessage());
             }
             dialog.dispose();
         }

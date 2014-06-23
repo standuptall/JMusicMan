@@ -277,17 +277,20 @@ public class EditInfo extends javax.swing.JDialog {
     private void OKBUttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBUttonActionPerformed
         this.setVisible(false);
         response = 1;
-        if (track.getAlbum().equals(albumField.getText())){
+        if (!track.getAlbum().equals(albumField.getText())){
             albumModified = true;
             track.setAlbum(albumField.getText());
         }
-        if (track.getArtist().equals(artistField.getText())){
+        if (!track.getArtist().equals(artistField.getText())){
             artistModified = true;
             track.setArtist(artistField.getText());
         }
-        if (track.getName().equals(titleField.getText())){
+        if (!track.getName().equals(titleField.getText())){
             titleModified = true;
             track.setName(titleField.getText());
+        }
+        if (!track.getName().equals(titleField.getText())){
+            track.setNumber(Integer.parseInt(titleField.getText()));
         }
         
         

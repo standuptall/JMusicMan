@@ -9,12 +9,12 @@ public class Track {
     public Track () {
 
     }
-    public Track(String artista, String nome, String album,String path) {
+    public Track(String artista, String nome, String album,String path,int n) {
         this.name = nome;
         this.artist = artista;
         this.album = album;
         this.path = path;
-    
+        this.number = n;
     }
     public Track(String artista, String nome, String album,String path,byte[] img) {
         this.name = nome;
@@ -29,8 +29,8 @@ public class Track {
         this.album = album;
         this.number = count;
     }
-    public void setDuration(int Duration) {
-        this.Duration = Duration;
+    public void setNumber(int n) {
+        this.number = n;
     }
 
     public int getDuration() {
