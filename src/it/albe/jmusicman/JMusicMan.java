@@ -296,70 +296,78 @@ public class JMusicMan {
      * ricreando pure il file XML                                                                           *
      ********************************************************************************************************/
     public static void update(){
-        rootElement = new Element("JMusicManLibrary");
-        rootElement.setAttribute("version","0.1");
-        Element element = new Element("lastedit");
-        rootElement.addContent(element);
-        element = new Element("player");
-        element.setText(playerDir);
-        rootElement.addContent(element);
-        element = new Element("library");
-        rootElement.addContent(element);
-        document = new Document(rootElement);
-        String artist = "";
-        String album = "";
-        String title = "";
-        int track = 0;
-        try {
-            ArrayList<File> files = findFiles(directory);
-            double progress = 0;
-            int progressint = 0;
-            double step = (double)100/(double)(files.size()+1);
-            frame.jProgressBar1.setStringPainted(true);
-            for (File file :files){
-                frame.jProgressBar1.setString(file.getAbsolutePath());
-                frame.update(frame.getGraphics());
-                progress += step; 
-                progressint = (int)progress;
-                frame.jProgressBar1.setValue(progressint);
-                Mp3File mp3file = new Mp3File(file.getAbsolutePath());
-                if (mp3file.hasId3v2Tag()){
-                    ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-                    artist = (id3v2Tag.getArtist()!=null) ? id3v2Tag.getArtist() : "Sconosciuto";
-                    album = (id3v2Tag.getAlbum()!=null) ? id3v2Tag.getAlbum() : "";
-                    title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
-                    if (artist.equals("Johannes Brahms"))
-                        track=0;
-                    track = (id3v2Tag.getTrack()!=null) ? Integer.parseInt(id3v2Tag.getTrack().replaceAll("[^0-9]", "")) : 0;
-                    if (!"".equals(artist))
-                            organize(file,artist,album,title,track);
+        javax.swing.SwingWorker<Void,Void> sw = new javax.swing.SwingWorker<Void,Void>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                rootElement = new Element("JMusicManLibrary");
+                rootElement.setAttribute("version","0.1");
+                Element element = new Element("lastedit");
+                rootElement.addContent(element);
+                element = new Element("player");
+                element.setText(playerDir);
+                rootElement.addContent(element);
+                element = new Element("library");
+                rootElement.addContent(element);
+                document = new Document(rootElement);
+                String artist = "";
+                String album = "";
+                String title = "";
+                int track = 0;
+                try {
+                    ArrayList<File> files = findFiles(directory);
+                    double progress = 0;
+                    int progressint = 0;
+                    double step = (double)100/(double)(files.size()+1);
+                    frame.jProgressBar1.setStringPainted(true);
+                    for (File file :files){
+                        frame.jProgressBar1.setString(file.getAbsolutePath());
+                        progress += step; 
+                        progressint = (int)progress;
+                        frame.jProgressBar1.setValue(progressint);
+                        Mp3File mp3file = new Mp3File(file.getAbsolutePath());
+                        if (mp3file.hasId3v2Tag()){
+                            ID3v2 id3v2Tag = mp3file.getId3v2Tag();
+                            artist = (id3v2Tag.getArtist()!=null) ? id3v2Tag.getArtist() : "Sconosciuto";
+                            album = (id3v2Tag.getAlbum()!=null) ? id3v2Tag.getAlbum() : "";
+                            title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
+                            if (artist.equals("Johannes Brahms"))
+                                track=0;
+                            track = (id3v2Tag.getTrack()!=null) ? Integer.parseInt(id3v2Tag.getTrack().replaceAll("[^0-9]", "")) : 0;
+                            if (!"".equals(artist))
+                                    organize(file,artist,album,title,track);
+                        }
+                        else if (mp3file.hasId3v1Tag()){
+                            ID3v1 id3v1Tag = mp3file.getId3v2Tag();
+                            artist = (id3v1Tag.getArtist()!=null) ? id3v1Tag.getArtist() : "Sconosciuto";
+                            album = (id3v1Tag.getAlbum()!=null) ? id3v1Tag.getAlbum() : "";
+                            title = (id3v1Tag.getTitle()!=null) ? id3v1Tag.getTitle() : file.getName();
+                            track = (id3v1Tag.getTrack()!=null) ? Integer.valueOf(id3v1Tag.getTrack()) : 0;
+                            if (!"".equals(artist))
+                                    organize(file,artist,album,title,track);
+                        }
+
+
+
+                    }
+                frame.jProgressBar1.setString("Pronto");
                 }
-                else if (mp3file.hasId3v1Tag()){
-                    ID3v1 id3v1Tag = mp3file.getId3v2Tag();
-                    artist = (id3v1Tag.getArtist()!=null) ? id3v1Tag.getArtist() : "Sconosciuto";
-                    album = (id3v1Tag.getAlbum()!=null) ? id3v1Tag.getAlbum() : "";
-                    title = (id3v1Tag.getTitle()!=null) ? id3v1Tag.getTitle() : file.getName();
-                    track = (id3v1Tag.getTrack()!=null) ? Integer.valueOf(id3v1Tag.getTrack()) : 0;
-                    if (!"".equals(artist))
-                            organize(file,artist,album,title,track);
+                catch(IOException e){
+                    IO.err(frame, "Errore nell'aggiornare la libreria: "+e.toString());
+
                 }
-                        
-                    
+                catch(java.lang.NumberFormatException e){
+                    IO.err(frame, "errore: "+e.getMessage()+artist);
+                }
+                catch(Exception e){
+                    IO.err(frame, "errore: "+e.getMessage()+artist);
+                }
+
                 
-            }
-        frame.jProgressBar1.setString("Pronto");
-        }
-        catch(IOException e){
-            IO.err(frame, "Errore nell'aggiornare la libreria: "+e.toString());
-        }
-        catch(java.lang.NumberFormatException e){
-            IO.err(frame, "errore: "+e.getMessage()+artist);
-        }
-        catch(Exception e){
-            IO.err(frame, "errore: "+e.getMessage()+artist);
-        }
-        
-        loadLibrary();
+                return null;
+                }
+        };
+        sw.execute();
     }
     /******************************************************************************
      *    Aggiorna solo la traccia in questione, sapendo che sono stati modificati*

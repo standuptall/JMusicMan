@@ -18,6 +18,9 @@ public class Album {
     public void addTrack(Track track) {
         trackList.add(track);
     }
+    public void addTrack(int i,Track track){
+        trackList.add(i, track);
+    }
     public Track getTrackByName(String name){
         for (int i=0;i<trackList.size();i++){
             Track track = (Track)trackList.get(i);

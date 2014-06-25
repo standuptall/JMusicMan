@@ -65,7 +65,7 @@ public class Frame extends javax.swing.JFrame{
                     
             }
         });
-        jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        jList1.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         jList1.getSelectionModel().addListSelectionListener(new javax.swing.event.ListSelectionListener() {
 
             @Override
@@ -73,7 +73,8 @@ public class Frame extends javax.swing.JFrame{
                 if (!lse.getValueIsAdjusting()){
                     Track track = (Track)jList1.getSelectedValue();
                     try{
-                        Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
+                        if (JMusicMan.playerDir!="")
+                            Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
                     }
                     catch(Exception e){
                         IO.err(null, "Errore nell'eseguire il player:"+e.toString());
@@ -369,8 +370,9 @@ public class Frame extends javax.swing.JFrame{
         Track track = null;
         try{
             if (evt.getButton()==3){
-                jList1.setSelectedIndex(jList1.locationToIndex(evt.getPoint()));
-                track = (Track)jList1.getSelectedValue();
+                List<Track> tracks = jList1.getSelectedValuesList();
+                if (tracks.isEmpty())
+                    throw new java.lang.NullPointerException("Nessuna traccia selezionata");
                 jPopupMenu1.show(this.jList1,evt.getX(),evt.getY());
             }
         }
@@ -382,11 +384,12 @@ public class Frame extends javax.swing.JFrame{
      * Evento appartenente al menù contestuale della lista
      */
     private void modificaPopumMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modificaPopumMenuActionPerformed
-        EditInfo dialog = new EditInfo(this,true,(Track)jList1.getSelectedValue());
+        EditInfo dialog = new EditInfo(this,true,jList1.getSelectedValuesList());
         dialog.setVisible(true);
         if (dialog.getResponse()==1){   //se hai premuto OK...
+            for (int i=0;i<dialog.getTracks().size();i++)
             try{
-                Track track = dialog.getTrack();
+                Track track = dialog.getTracks().get(i);
                 Mp3File mp3file = new Mp3File(track.getPath());
                 ID3v2 id3;
                 if (mp3file.hasId3v2Tag()) {

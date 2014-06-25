@@ -13,27 +13,42 @@ import java.awt.Toolkit;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;
+import java.util.List;
 /**
  
  * @author Alberto
  */
 public class EditInfo extends javax.swing.JDialog {
     private Track track;
+    private List<Track> tracks;
     private int response;
+    public boolean multipleEdit;
     public boolean artistModified, titleModified, albumModified, imageModified, trackModified;
 
     /**
      * Creates new form EditInfo
      */
-    public EditInfo(java.awt.Frame parent, boolean modal, final Track track) {
-        
+    public EditInfo(java.awt.Frame parent, boolean modal, List<Track> tracks) {
         super(parent, modal);
         artistModified = false;
         titleModified = false;
         albumModified = false;
         imageModified = false;
-        this.track = track;
+        multipleEdit = false;
         initComponents();
+        this.tracks = tracks;
+        if (tracks.size()==1){
+            editTrack(tracks.get(0));
+        }
+        else
+            editTracks(tracks);
+        
+        
+        
+    }
+    
+    public void editTrack(final Track track){
+        this.track = track;
         artistField.setText(track.getArtist());
         albumField.setText(track.getAlbum());
         titleField.setText(track.getName());
@@ -44,9 +59,9 @@ public class EditInfo extends javax.swing.JDialog {
             byte[] img = ID3.getAlbumImage();
             javax.swing.ImageIcon image = new javax.swing.ImageIcon(img);
             final JLabel label = new JLabel(image);
-            
+
             java.awt.event.ActionListener menuListener = new java.awt.event.ActionListener() {
-                
+
                 public void actionPerformed(java.awt.event.ActionEvent event) {
                     if (event.getActionCommand().equals("Incolla")){
                         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -67,7 +82,7 @@ public class EditInfo extends javax.swing.JDialog {
                             }
                         }
                         catch (Exception e){
-                            
+
                         }
                     }
                     if (event.getActionCommand().equals("Copia")){
@@ -76,10 +91,10 @@ public class EditInfo extends javax.swing.JDialog {
                         TransferableImage transferable= new TransferableImage(imageIcon.getImage());
                         clipboard.setContents(transferable, null);
                     }
-                   
+
                 }
             };
-            
+
             final JPopupMenu popup = new JPopupMenu();
             JMenuItem item = new JMenuItem("Copia");
             item.addActionListener(menuListener);
@@ -97,50 +112,60 @@ public class EditInfo extends javax.swing.JDialog {
 
                 @Override
                 public void mousePressed(MouseEvent me) {
-                    
-                    
-                    
+
+
+
                 }
 
                 @Override
                 public void mouseReleased(MouseEvent me) {
-                    
+
                 }
 
                 @Override
                 public void mouseEntered(MouseEvent me) {
-                    
+
                 }
 
                 @Override
                 public void mouseExited(MouseEvent me) {
-                    
+
                 }
 
                 @Override
                 public void mouseDragged(MouseEvent me) {
-                    
+
                 }
 
                 @Override
                 public void mouseMoved(MouseEvent me) {
-                    
+
                 }
             });
             jScrollPane2.setViewportView(label);
         }
         catch (Exception e){
-            
+
         }
-        
-        
-        //Byte[] img = 
+    }
+    
+    public void editTracks(List<Track> tracks){
+        this.track = tracks.get(0);
+        multipleEdit = true;
+        titleField.setEnabled(false);
+        trackNumberField.setEnabled(false);
+        commentField.setEnabled(false);
+        artistField.setText(tracks.get(0).getArtist());
+        albumField.setText(tracks.get(0).getAlbum());
     }
     public EditResult editResult(){
         return new EditResult(artistModified, titleModified,albumModified,imageModified);
     }
     public Track getTrack(){
         return track;
+    }
+    public List<Track> getTracks(){
+        return tracks;
     }
     public int getResponse(){
         return response;
@@ -163,7 +188,7 @@ public class EditInfo extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         trackNumberField = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
+        commentField = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -181,9 +206,9 @@ public class EditInfo extends javax.swing.JDialog {
 
         jLabel4.setText("Numero traccia");
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        commentField.setColumns(20);
+        commentField.setRows(5);
+        jScrollPane1.setViewportView(commentField);
 
         jLabel5.setText("Commento");
 
@@ -280,21 +305,26 @@ public class EditInfo extends javax.swing.JDialog {
         if (!track.getAlbum().equals(albumField.getText())){
             albumModified = true;
             track.setAlbum(albumField.getText());
+            for(int i=0;i<tracks.size();i++)
+                tracks.get(i).setAlbum(albumField.getText());
         }
         if (!track.getArtist().equals(artistField.getText())){
             artistModified = true;
             track.setArtist(artistField.getText());
+            for(int i=0;i<tracks.size();i++)
+                tracks.get(i).setArtist(artistField.getText());
         }
-        if (!track.getName().equals(titleField.getText())){
-            titleModified = true;
-            track.setName(titleField.getText());
+        if (!multipleEdit){
+            if (!track.getName().equals(titleField.getText())){
+                titleModified = true;
+                track.setName(titleField.getText());
+            }
+            if (!Integer.toString(track.getNumber()).equals(trackNumberField.getText())){
+                trackModified = true;
+                track.setNumber(Integer.parseInt(trackNumberField.getText()));
+            }
         }
-        if (!Integer.toString(track.getNumber()).equals(trackNumberField.getText())){
-            trackModified = true;
-            track.setNumber(Integer.parseInt(trackNumberField.getText()));
-        }
-        
-        
+
         //image already handled in ActionListener, row 66
     }//GEN-LAST:event_OKBUttonActionPerformed
 
@@ -349,6 +379,7 @@ public class EditInfo extends javax.swing.JDialog {
     private javax.swing.JTextField albumField;
     private javax.swing.JButton annullaButton;
     private javax.swing.JTextField artistField;
+    private javax.swing.JTextArea commentField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -357,7 +388,6 @@ public class EditInfo extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField titleField;
     private javax.swing.JTextField trackNumberField;
     // End of variables declaration//GEN-END:variables
