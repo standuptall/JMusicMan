@@ -139,6 +139,7 @@ public class Frame extends javax.swing.JFrame{
         jTree1.setAutoscrolls(true);
         jTree1.setMaximumSize(new java.awt.Dimension(107, 1000));
         jTree1.setPreferredSize(new java.awt.Dimension(107, 600));
+        jTree1.setRowHeight(0);
         jScrollPane1.setViewportView(jTree1);
 
         jSplitPane1.setLeftComponent(jScrollPane1);

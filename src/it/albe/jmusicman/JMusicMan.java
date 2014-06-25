@@ -24,7 +24,7 @@ import org.jdom.filter.ElementFilter;
  */
 public class JMusicMan {
     public static Element rootElement;  //rootElement del documento XML
-    public static String directory = "C:\\Users\\Alberto\\Music\\";  
+    public static String directory = System.getProperty("user.home")+"\\Music\\";  
     public static Document document;
     public static File root = null;      //root directory del dispositivo
     public static long lastedit;         //timestamp dell'ultima modifica del file xml
@@ -45,7 +45,14 @@ public class JMusicMan {
         
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)frame.jTree1.getModel().getRoot();
         try{
-            document = builder.build(new File (directory+"JMusicManLibrary.xml"));
+            File libraryFile = new File (directory+"JMusicManLibrary.xml");
+            if (libraryFile.exists())
+                    document = builder.build(libraryFile);
+                else if (IO.confirm(frame, "I brani verranno ordinati nella cartella Musica come:\n"
+                        + "[artista]/[album]/[numero traccia] - [titolo].mp3. Procedere?")>0)
+                        System.exit(0);
+            else 
+                update();
             rootElement = document.getRootElement();
             Element lasteditElement = rootElement.getChild("lastedit");
             lastedit = Long.valueOf(lasteditElement.getText());
@@ -273,7 +280,9 @@ public class JMusicMan {
             java.util.Date data = new java.util.Date();
             rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
             XMLOutputter xmlOutput = new XMLOutputter();
-            xmlOutput.setFormat(Format.getPrettyFormat());
+            Format format = Format.getPrettyFormat();
+            format.setEncoding("UTF-8");
+            xmlOutput.setFormat(format);
             document.setRootElement(rootElement);
             xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
         }
@@ -303,15 +312,16 @@ public class JMusicMan {
         int track = 0;
         try {
             ArrayList<File> files = findFiles(directory);
-            int progress = 0;
-            int step = 100/(files.size()+1);
+            double progress = 0;
+            int progressint = 0;
+            double step = (double)100/(double)(files.size()+1);
             frame.jProgressBar1.setStringPainted(true);
             for (File file :files){
-                
                 frame.jProgressBar1.setString(file.getAbsolutePath());
                 frame.update(frame.getGraphics());
                 progress += step; 
-                frame.jProgressBar1.setValue(progress);
+                progressint = (int)progress;
+                frame.jProgressBar1.setValue(progressint);
                 Mp3File mp3file = new Mp3File(file.getAbsolutePath());
                 if (mp3file.hasId3v2Tag()){
                     ID3v2 id3v2Tag = mp3file.getId3v2Tag();
@@ -380,7 +390,9 @@ public class JMusicMan {
             java.util.Date data = new java.util.Date();
             rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
             XMLOutputter xmlOutput = new XMLOutputter();
-            xmlOutput.setFormat(Format.getPrettyFormat());
+            Format format = Format.getPrettyFormat();
+            format.setEncoding("UTF-8");
+            xmlOutput.setFormat(format);
             document.setRootElement(rootElement);
             xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
             int  c=0;
@@ -451,7 +463,9 @@ public class JMusicMan {
             root.addContent(element);
             Document document = new Document(root);
             XMLOutputter xmlOutput = new XMLOutputter();
-            xmlOutput.setFormat(Format.getPrettyFormat());
+            Format format = Format.getPrettyFormat();
+            format.setEncoding("UTF-8");
+            xmlOutput.setFormat(format);
             xmlOutput.output(document,new FileWriter(file.getAbsolutePath()));
         }
         
@@ -473,7 +487,8 @@ public class JMusicMan {
                 if (c=='\\'||c=='/'||c==':'||c=='*'||c=='?'||c=='\"'||c=='<'||c=='>'||c=='|'||c=='\t')
                     array[i] = '_';
             }
-            return String.copyValueOf(array);
+            String checked = String.copyValueOf(array);
+            return checked;
         }
     
     /**********************************************************************************

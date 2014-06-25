@@ -3,7 +3,7 @@ Ant-Version: Apache Ant 1.8.3
 Created-By: 1.7.0_10-b18 (Oracle Corporation)
 Bundle-Name: JMusicMan
 Bundle-Version: 0.1.2
-Bundle-Date: 2014-06-23 23:47:19
+Bundle-Date: 2014-06-24 15:55:29
 Implementation-Title: JMusicMan
 Implementation-Version: 0.1.2
 Implementation-URL: http://newbufferedwriter.blogspot.org
