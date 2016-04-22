@@ -17,7 +17,9 @@ import it.albe.utils.IO;
  * @author Alberto
  */
 public class AudioFile {
-    private String artist,album,title;
+    private String artist,album,title, path;
+    private FlacReader flacReader;
+    private Mp3File mp3file;
     private byte[] albumImage;
     private int track;
     private enum _filetype {mp3,flac};
@@ -26,12 +28,13 @@ public class AudioFile {
         artist = "";
         album = "";
         title = "";
+        this.path = path;
         track = 0;
         try {
             if (path.toUpperCase().endsWith("MP3")){
                 this.filetype = _filetype.mp3;
                 File file = new File(path);
-                Mp3File mp3file = new Mp3File(path);
+                mp3file = new Mp3File(path);
                 if (mp3file.hasId3v2Tag()){
                     ID3v2 id3v2Tag = mp3file.getId3v2Tag();
                     artist = (id3v2Tag.getArtist()!=null) ? id3v2Tag.getArtist() : "Sconosciuto";
@@ -55,7 +58,7 @@ public class AudioFile {
             else if(path.toUpperCase().endsWith("FLAC")){
                 this.filetype = _filetype.flac;
                 File file = new File(path);
-                FlacReader flacReader = new FlacReader(path);
+                flacReader = new FlacReader(path);
                 artist = flacReader.getComment("artist");
                 album = flacReader.getComment("album");
                 title = flacReader.getComment("title");
@@ -80,8 +83,75 @@ public class AudioFile {
          
             
     }
+    public void setArtist(String art){        
+        if (!art.equals(""))
+        {
+            artist = art;
+            if (this.filetype == _filetype.flac){
+                flacReader.addComment("artist", art);
+            }
+            if (this.filetype == _filetype.mp3){
+                ID3v2 id3;
+                if (mp3file.hasId3v2Tag()) {
+                    id3 = mp3file.getId3v2Tag();
+                    } else {
+                      id3 = new ID3v24Tag();
+                      mp3file.setId3v2Tag(id3);
+                      }
+                id3.setArtist(art);
+            }
+        }
+    }
+    public void setAlbum(String alb){
+        album = alb;
+        if (this.filetype == _filetype.flac){
+            flacReader.addComment("album", alb);
+        }
+        if (this.filetype == _filetype.mp3){
+            ID3v2 id3;
+            if (mp3file.hasId3v2Tag()) {
+                id3 = mp3file.getId3v2Tag();
+                } else {
+                  id3 = new ID3v24Tag();
+                  mp3file.setId3v2Tag(id3);
+                  }
+            id3.setAlbum(alb);
+        }
+    }
+    public void setTitle(String tit){
+        title = tit;
+        if (this.filetype == _filetype.flac){
+            flacReader.addComment("title", tit);
+        }
+        if (this.filetype == _filetype.mp3){
+            ID3v2 id3;
+            if (mp3file.hasId3v2Tag()) {
+                id3 = mp3file.getId3v2Tag();
+                } else {
+                  id3 = new ID3v24Tag();
+                  mp3file.setId3v2Tag(id3);
+                  }
+            id3.setTitle(tit);
+        }
+    }
+    public void setTrack(int tra) {
+        track = tra;
+        if (this.filetype == _filetype.flac){
+            flacReader.addComment("track", Integer.toString(tra));
+        }
+        if (this.filetype == _filetype.mp3){
+            ID3v2 id3;
+            if (mp3file.hasId3v2Tag()) {
+                id3 = mp3file.getId3v2Tag();
+                } else {
+                  id3 = new ID3v24Tag();
+                  mp3file.setId3v2Tag(id3);
+                  }
+            id3.setTrack(Integer.toString(tra));
+        }
+    }
     public String getArtist(){
-        return artist;
+         return artist;
     }
     public String getAlbum(){
         return album;
@@ -94,5 +164,12 @@ public class AudioFile {
     }
     public byte[] getAlbumImage(){
         return albumImage;
+    }
+    public void close(){
+        if (this.filetype == _filetype.flac){
+            flacReader.writeAll();
+        }
+        if (this.filetype == _filetype.mp3)
+            mp3file.save(newTrack.getPath());
     }
 }

@@ -390,21 +390,20 @@ public class Frame extends javax.swing.JFrame{
             for (int i=0;i<dialog.getTracks().size();i++)
             try{
                 Track track = dialog.getTracks().get(i);
-                Mp3File mp3file = new Mp3File(track.getPath());
-                ID3v2 id3;
-                if (mp3file.hasId3v2Tag()) {
-                    id3 = mp3file.getId3v2Tag();
-                    } else {
-                      id3 = new ID3v24Tag();
-                      mp3file.setId3v2Tag(id3);
-                      }
-                id3.setAlbum(track.getAlbum());
-                id3.setTitle(track.getName());
-                id3.setArtist(track.getArtist());
-                id3.setAlbumImage(track.getImg(), "image/png");
-                id3.setTrack(Integer.toString(track.getNumber()));
+                AudioFile audioFile = new AudioFile(track.getPath());
+                if (dialog.albumModified)
+                    audioFile.setAlbum(track.getAlbum());
+                if (dialog.titleModified)
+                    audioFile.setTitle(track.getName());
+                if (dialog.artistModified)
+                    audioFile.setArtist(track.getArtist());
+                if (dialog.imageModified)
+                    ;//audioFile.setAlbumImage(track.getImg(), "image/png");
+                if (dialog.trackModified)
+                    audioFile.setTrack(track.getNumber());
+                
+                
                 Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
-                mp3file.save(newTrack.getPath());
                 File file = new File(track.getPath());
                 file.delete();
                 JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), track.getNumber());
