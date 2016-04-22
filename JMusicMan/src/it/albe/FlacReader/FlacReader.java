@@ -18,6 +18,7 @@ public class FlacReader
 {
     public static String vendor_string;
     public static int user_comment_list_length;
+    private byte[] albumImage;
     private String filepath;
     /*
     private static class _metadata {
@@ -136,13 +137,14 @@ public class FlacReader
     } ;
     _metadata metadata;
     */
-    private int metadata_comments_length;
+    private int metadata_comments_length,metadata_picture_length;
     public Map<String,String> comments;
     public Map<String, String> metadataDict;
     //public System.Data.DataTable metadataInfo;
     public FlacReader(String filepath)
     {
         metadata_comments_length = 0;
+        metadata_picture_length = 0;
         //metadata = new _metadata();  //oggetto che memorizza se sono presenti o no metadata specifici
         comments = new HashMap<String, String>();
         metadataDict = new HashMap<String, String>();
@@ -192,6 +194,12 @@ public class FlacReader
                 {
                     metadata_comments_length = metadata_length;
                     caricaCommenti(stream);
+                } 
+                else if (flag == 0b00000110 || flag == 0b10000110)   //se è un vorbis comment cioè 00000100 oppure 10000100
+                {
+                    metadata_picture_length = metadata_length;
+                    albumImage = new byte[metadata_picture_length];
+                    stream.read(albumImage, 0, metadata_picture_length);
                 }
                 else
                     stream.skip(metadata_length); //mi sposto della lunghezza del metadata
@@ -249,6 +257,9 @@ public class FlacReader
         {
             return "";
         }
+    }
+    public byte[] getAlbumImage(){
+        return albumImage;
     }
     public void writeAll()  //file esistente quindi riverso il contenuto su un file _temp
     {

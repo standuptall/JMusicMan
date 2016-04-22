@@ -4,13 +4,13 @@
  * and open the template in the editor.
  */
 package it.albe.JMusicMan;
+import it.albe.FlacReader.FlacReader;
 import java.lang.String;
 import java.io.File;
 import com.mpatric.mp3agic.*;
 import static it.albe.JMusicMan.JMusicMan.frame;
 import static it.albe.JMusicMan.JMusicMan.organize;
 import it.albe.utils.IO;
-import net.sf.jni4net.Bridge;
 
 /**
  *
@@ -18,6 +18,7 @@ import net.sf.jni4net.Bridge;
  */
 public class AudioFile {
     private String artist,album,title;
+    private byte[] albumImage;
     private int track;
     private enum _filetype {mp3,flac};
     public  _filetype filetype;
@@ -37,6 +38,7 @@ public class AudioFile {
                     album = (id3v2Tag.getAlbum()!=null) ? id3v2Tag.getAlbum() : "";
                     title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
                     track = (id3v2Tag.getTrack()!=null) ? Integer.parseInt(id3v2Tag.getTrack().replaceAll("[^0-9]", "")) : 0;
+                    albumImage = id3v2Tag.getAlbumImage();
                     if (!"".equals(artist))
                             organize(file,artist,album,title,track);
                 }
@@ -46,20 +48,24 @@ public class AudioFile {
                     album = (id3v1Tag.getAlbum()!=null) ? id3v1Tag.getAlbum() : "";
                     title = (id3v1Tag.getTitle()!=null) ? id3v1Tag.getTitle() : file.getName();
                     track = (id3v1Tag.getTrack()!=null) ? Integer.valueOf(id3v1Tag.getTrack()) : 0;
-                    if (!"".equals(artist))
-                            organize(file,artist,album,title,track);
+                    
                 }
             }
 
             else if(path.toUpperCase().endsWith("FLAC")){
                 this.filetype = _filetype.flac;
-                Bridge.setVerbose(true);
-		Bridge.init();
+                File file = new File(path);
                 FlacReader flacReader = new FlacReader(path);
                 artist = flacReader.getComment("artist");
                 album = flacReader.getComment("album");
                 title = flacReader.getComment("title");
+                albumImage = flacReader.getAlbumImage();
                 String trackString = flacReader.getComment("track");
+                String n,nall;
+                n = trackString.split("/")[0];
+                if (!n.equals(""))
+                        track = Integer.parseInt(n);
+                
             }    
         }
         catch (java.io.IOException e){
@@ -85,5 +91,8 @@ public class AudioFile {
     }
     public int getTrack(){
         return track;
+    }
+    public byte[] getAlbumImage(){
+        return albumImage;
     }
 }
