@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.jmusicman;
+package it.albe.JMusicMan;
 
 import com.mpatric.mp3agic.*;
 import it.albe.utils.IO;
@@ -13,6 +13,7 @@ import java.awt.Toolkit;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;
+import java.awt.event.WindowEvent;
 import java.util.List;
 /**
  
@@ -30,6 +31,12 @@ public class EditInfo extends javax.swing.JDialog {
      */
     public EditInfo(java.awt.Frame parent, boolean modal, List<Track> tracks) {
         super(parent, modal);
+        this.addWindowStateListener(new java.awt.event.WindowStateListener() {
+            @Override
+            public void windowStateChanged(WindowEvent we) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
         artistModified = false;
         titleModified = false;
         albumModified = false;
@@ -54,9 +61,8 @@ public class EditInfo extends javax.swing.JDialog {
         titleField.setText(track.getName());
         trackNumberField.setText(Integer.toString(track.getNumber()));
         try{
-            Mp3File mp3 = new Mp3File(track.getPath());
-            ID3v2 ID3 = mp3.getId3v2Tag();
-            byte[] img = ID3.getAlbumImage();
+            AudioFile audioFile = new AudioFile(track.getPath());
+            byte[] img = audioFile.getAlbumImage();
             javax.swing.ImageIcon image = new javax.swing.ImageIcon(img);
             final JLabel label = new JLabel(image);
 
@@ -150,6 +156,7 @@ public class EditInfo extends javax.swing.JDialog {
     }
     
     public void editTracks(List<Track> tracks){
+        /* per molte tracce */
         this.track = tracks.get(0);
         multipleEdit = true;
         titleField.setEnabled(false);

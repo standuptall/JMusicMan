@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.jmusicman;
+package it.albe.JMusicMan;
 import it.albe.utils.IO;
 import java.awt.Toolkit;
 import java.io.*;
@@ -96,7 +96,7 @@ public class FrameDetect extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        it.albe.jmusicman.JMusicMan.root = (File)jList1.getSelectedValue();
+        it.albe.JMusicMan.JMusicMan.root = (File)jList1.getSelectedValue();
         JMusicMan.frame.label.setText(JMusicMan.root.getAbsolutePath());
         this.dispose();
     }//GEN-LAST:event_jButton1ActionPerformed

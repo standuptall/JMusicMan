@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.jmusicman;
+package it.albe.JMusicMan;
 import it.albe.utils.IO;
 import java.io.*;
 import java.util.Iterator;
@@ -13,8 +13,8 @@ import org.jdom.output.*;
 import javax.swing.tree.*;
 import com.mpatric.mp3agic.*;
 import java.util.ArrayList;
-import javax.swing.UIManager;
 import org.jdom.filter.ElementFilter;
+
 /**
  *
  * @author Alberto
@@ -41,6 +41,7 @@ public class JMusicMan {
     public static void loadLibrary(){
         SAXBuilder builder = new SAXBuilder();    
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicManLibrary");
+        treeNode1.removeAllChildren();
         frame.jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         
         DefaultMutableTreeNode root = (DefaultMutableTreeNode)frame.jTree1.getModel().getRoot();
@@ -196,19 +197,40 @@ public class JMusicMan {
      **************************************************************************************/
     
     public static void organize(File file,String artist,String album, String title, int track){
+        try {
+            if (album.equals("")||title.equals(""))
+                throw new it.albe.JMusicMan.EmptyTagException("I tag album e titolo devono essere riempiti");
+        }
+        catch(it.albe.JMusicMan.EmptyTagException e){
+                IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
+                return;
+            }
         String fileTitle;
-        if (track!=0) 
-            fileTitle = String.format("%02d",track) +" - "+checkFileName(title)+".mp3";
-        else 
-            fileTitle = checkFileName(title)+".mp3";
-        File mp3file = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
-        mp3file.mkdirs();
-        mp3file = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
+        String trackNo = "";
+        fileTitle = "";
+        if (track!=0)
+            trackNo = String.format("%02d",track) +" - ";
+        if (file.getAbsolutePath().endsWith(".mp3"))
+            fileTitle = trackNo+checkFileName(title)+".mp3";
+        else if (file.getAbsolutePath().endsWith(".flac"))
+            fileTitle = trackNo+checkFileName(title)+".flac";
+        if (fileTitle.equals(""))
+            try {
+                throw new it.albe.JMusicMan.EmptyTagException("Tag vuoti");
+            }
+            catch(it.albe.JMusicMan.EmptyTagException e){
+                IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
+                return;
+            }
+            
+        File audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
+        audioFile.mkdirs();
+        audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
         try{
-            if (mp3file.createNewFile()){
-                mp3file.delete();
+            if (audioFile.createNewFile()){
+                audioFile.delete();
                 java.io.FileInputStream reader = new FileInputStream(file);
-                FileOutputStream writer = new FileOutputStream(mp3file);
+                FileOutputStream writer = new FileOutputStream(audioFile);
                 byte[] bytes =  new byte[1024];
                 int numbytes;
                 while ((numbytes = reader.read(bytes))>0){
@@ -225,6 +247,7 @@ public class JMusicMan {
         catch(IOException e){
             IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
         }
+        
         try{
             List artists =rootElement.getChild("library").getChildren();
              Iterator iterator = artists.iterator();
@@ -275,7 +298,7 @@ public class JMusicMan {
              }
              element = new Element("path");
              trackElement.addContent(element);
-             element.setText(mp3file.getAbsolutePath());
+             element.setText(audioFile.getAbsolutePath());
             albumElement.addContent(trackElement);
             java.util.Date data = new java.util.Date();
             rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
@@ -289,7 +312,7 @@ public class JMusicMan {
         catch(IOException e){
             IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
         }
-        
+        loadLibrary();
     }
     /********************************************************************************************************
      * Trova tutti i files mp3 presenti nella cartella /Music del PC e li organizza nelle apposite cartelle,*
@@ -325,42 +348,24 @@ public class JMusicMan {
                         progress += step; 
                         progressint = (int)progress;
                         frame.jProgressBar1.setValue(progressint);
-                        Mp3File mp3file = new Mp3File(file.getAbsolutePath());
-                        if (mp3file.hasId3v2Tag()){
-                            ID3v2 id3v2Tag = mp3file.getId3v2Tag();
-                            artist = (id3v2Tag.getArtist()!=null) ? id3v2Tag.getArtist() : "Sconosciuto";
-                            album = (id3v2Tag.getAlbum()!=null) ? id3v2Tag.getAlbum() : "";
-                            title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
-                            if (artist.equals("Johannes Brahms"))
-                                track=0;
-                            track = (id3v2Tag.getTrack()!=null) ? Integer.parseInt(id3v2Tag.getTrack().replaceAll("[^0-9]", "")) : 0;
-                            if (!"".equals(artist))
-                                    organize(file,artist,album,title,track);
-                        }
-                        else if (mp3file.hasId3v1Tag()){
-                            ID3v1 id3v1Tag = mp3file.getId3v2Tag();
-                            artist = (id3v1Tag.getArtist()!=null) ? id3v1Tag.getArtist() : "Sconosciuto";
-                            album = (id3v1Tag.getAlbum()!=null) ? id3v1Tag.getAlbum() : "";
-                            title = (id3v1Tag.getTitle()!=null) ? id3v1Tag.getTitle() : file.getName();
-                            track = (id3v1Tag.getTrack()!=null) ? Integer.valueOf(id3v1Tag.getTrack()) : 0;
-                            if (!"".equals(artist))
-                                    organize(file,artist,album,title,track);
-                        }
-
-
-
+                        AudioFile audioFile = new AudioFile(file.getAbsolutePath());
+                        artist = (audioFile.getArtist()!=null) ? audioFile.getArtist() : "Sconosciuto";
+                        album = (audioFile.getAlbum()!=null) ? audioFile.getAlbum() : "";
+                        title = (audioFile.getTitle()!=null) ? audioFile.getTitle() : file.getName();
+                        track = (audioFile.getTrack()!=0) ? audioFile.getTrack() : 0;
+                        if (!"".equals(artist))
+                            organize(file,artist,album,title,track);
                     }
-                frame.jProgressBar1.setString("Pronto");
-                }
-                catch(IOException e){
-                    IO.err(frame, "Errore nell'aggiornare la libreria: "+e.toString());
-
+                    frame.jProgressBar1.setString("Pronto");
                 }
                 catch(java.lang.NumberFormatException e){
                     IO.err(frame, "errore: "+e.getMessage()+artist);
+                    e.printStackTrace();
+                            
                 }
                 catch(Exception e){
                     IO.err(frame, "errore: "+e.getMessage()+artist);
+                    e.printStackTrace();
                 }
 
                 
@@ -393,22 +398,24 @@ public class JMusicMan {
                 ;
             while (deleteOrphansElements())
                 ;
+            try {
+                java.util.Date data = new java.util.Date();
+                rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
+                XMLOutputter xmlOutput = new XMLOutputter();
+                Format format = Format.getPrettyFormat();
+                format.setEncoding("UTF-8");
+                xmlOutput.setFormat(format);
+                document.setRootElement(rootElement);
+                xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
+                int  c=0;
+                loadLibrary();
+            }
+            catch (Exception e){
+                IO.err(frame, "Errore nell'aggiornare la traccia:"+e.toString());
+            }
+            
         }
-        try {
-            java.util.Date data = new java.util.Date();
-            rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
-            XMLOutputter xmlOutput = new XMLOutputter();
-            Format format = Format.getPrettyFormat();
-            format.setEncoding("UTF-8");
-            xmlOutput.setFormat(format);
-            document.setRootElement(rootElement);
-            xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
-            int  c=0;
-        }
-        catch (Exception e){
-            IO.err(frame, "Errore nell'aggiornare la traccia:"+e.toString());
-        }
-        loadLibrary();
+        
     }
     /***************************************************************
      * Copia le tracce sul dispositivo                             *
@@ -574,7 +581,8 @@ public class JMusicMan {
                         files.addAll(findFiles(filesAndDirectories[i].getAbsolutePath()));
                 }
                 else {
-                    if (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith("MP3"))
+                    if (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith("MP3")||
+                        filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith("FLAC"))
                         files.add(filesAndDirectories[i]);
                 }
             }

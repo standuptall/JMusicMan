@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.jmusicman;
+package it.albe.JMusicMan;
 
 import it.albe.utils.IO;
 import java.awt.Toolkit;
@@ -335,7 +335,7 @@ public class Frame extends javax.swing.JFrame{
     }//GEN-LAST:event_sincronizzaMenuItemActionPerformed
 
     private void aboutItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutItemActionPerformed
-        IO.print(this, "JMusicMan versione "+Version.getVersion()+"\n(c) 2014 Alberto Zichittella\nIl programma non fornisce alcuna garanzia.\nRilasciato sotto licenza GPL3" );
+        IO.print(this, "JMusicMan versione "+Version.getVersion()+"\n(c) 2016 Alberto Zichittella\nIl programma non fornisce alcuna garanzia.\nRilasciato sotto licenza GPL3" );
     }//GEN-LAST:event_aboutItemActionPerformed
 
     private void impostaPlayerMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_impostaPlayerMenuItemActionPerformed
@@ -390,21 +390,20 @@ public class Frame extends javax.swing.JFrame{
             for (int i=0;i<dialog.getTracks().size();i++)
             try{
                 Track track = dialog.getTracks().get(i);
-                Mp3File mp3file = new Mp3File(track.getPath());
-                ID3v2 id3;
-                if (mp3file.hasId3v2Tag()) {
-                    id3 = mp3file.getId3v2Tag();
-                    } else {
-                      id3 = new ID3v24Tag();
-                      mp3file.setId3v2Tag(id3);
-                      }
-                id3.setAlbum(track.getAlbum());
-                id3.setTitle(track.getName());
-                id3.setArtist(track.getArtist());
-                id3.setAlbumImage(track.getImg(), "image/png");
-                id3.setTrack(Integer.toString(track.getNumber()));
+                AudioFile audioFile = new AudioFile(track.getPath());
+                if (dialog.albumModified)
+                    audioFile.setAlbum(track.getAlbum());
+                if (dialog.titleModified)
+                    audioFile.setTitle(track.getName());
+                if (dialog.artistModified)
+                    audioFile.setArtist(track.getArtist());
+                if (dialog.imageModified)
+                    ;//audioFile.setAlbumImage(track.getImg(), "image/png");
+                if (dialog.trackModified)
+                    audioFile.setTrack(track.getNumber());
+                
+                
                 Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
-                mp3file.save(newTrack.getPath());
                 File file = new File(track.getPath());
                 file.delete();
                 JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), track.getNumber());
@@ -450,6 +449,13 @@ public class Frame extends javax.swing.JFrame{
                 new Frame().setVisible(true);
             }
         });
+        /*
+        it.albe.FlacReader.FlacReader flacreader = new it.albe.FlacReader.FlacReader("C:\\Alberto\\recit16bit.flac");
+        flacreader.addComment("artist", "Adriano Celentano");
+        flacreader.addComment("album", "24000 baci");
+        flacreader.addComment("title", "una carezza in un pugno");
+        flacreader.addComment("track", "6");
+        flacreader.writeAll();*/
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutItem;
