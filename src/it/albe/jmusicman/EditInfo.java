@@ -10,11 +10,14 @@ import java.awt.event.MouseEvent;
 import javax.swing.*;
 import java.awt.datatransfer.*;
 import java.awt.Toolkit;
-import java.io.IOException;
+import java.io.*;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics;
 import java.awt.event.WindowEvent;
 import java.util.List;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 /**
  
  * @author Alberto
@@ -61,8 +64,10 @@ public class EditInfo extends javax.swing.JDialog {
         titleField.setText(track.getName());
         trackNumberField.setText(Integer.toString(track.getNumber()));
         try{
-            AudioFile audioFile = new AudioFile(track.getPath());
-            byte[] img = audioFile.getAlbumImage();
+            AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
+            Tag tag = audioFile.getTag();
+            
+            byte[] img = null;//audioFile.getAlbumImage();
             javax.swing.ImageIcon image = new javax.swing.ImageIcon(img);
             final JLabel label = new JLabel(image);
 
@@ -77,7 +82,7 @@ public class EditInfo extends javax.swing.JDialog {
                         if (contents!=null)
                             if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)){
                                 image = (java.awt.Image)contents.getTransferData(DataFlavor.imageFlavor);
-                                label.setIcon(new javax.swing.ImageIcon(image));
+                                //label.setIcon(new javax.swing.ImageIcon(image));
                                 jScrollPane2.setViewportView(label);
                                 BufferedImage bimage = (BufferedImage)image;
                                 java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream(); 
@@ -100,7 +105,7 @@ public class EditInfo extends javax.swing.JDialog {
 
                 }
             };
-
+            
             final JPopupMenu popup = new JPopupMenu();
             JMenuItem item = new JMenuItem("Copia");
             item.addActionListener(menuListener);
@@ -109,7 +114,7 @@ public class EditInfo extends javax.swing.JDialog {
             item.addActionListener(menuListener);
             popup.add(item);
             label.addMouseListener(new javax.swing.event.MouseInputListener() {
-
+                
                 @Override
                 public void mouseClicked(MouseEvent me) {
                     if (me.getButton()==3)

@@ -14,6 +14,10 @@ import javax.swing.tree.*;
 import com.mpatric.mp3agic.*;
 import java.util.ArrayList;
 import org.jdom.filter.ElementFilter;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 /**
  *
@@ -348,11 +352,12 @@ public class JMusicMan {
                         progress += step; 
                         progressint = (int)progress;
                         frame.jProgressBar1.setValue(progressint);
-                        AudioFile audioFile = new AudioFile(file.getAbsolutePath());
-                        artist = (audioFile.getArtist()!=null) ? audioFile.getArtist() : "Sconosciuto";
-                        album = (audioFile.getAlbum()!=null) ? audioFile.getAlbum() : "";
-                        title = (audioFile.getTitle()!=null) ? audioFile.getTitle() : file.getName();
-                        track = (audioFile.getTrack()!=0) ? audioFile.getTrack() : 0;
+                        AudioFile audioFile = AudioFileIO.read(file);
+                        Tag tag = audioFile.getTag();
+                        artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
+                        album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
+                        title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : file.getName();
+                        track = (tag.getFirst(FieldKey.TRACK)!=null) ? Integer.parseInt(tag.getFirst(FieldKey.TRACK)) : 0;
                         if (!"".equals(artist))
                             organize(file,artist,album,title,track);
                     }

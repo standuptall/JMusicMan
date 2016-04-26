@@ -19,7 +19,10 @@ import org.jdom.Element;
 import org.jdom.filter.ElementFilter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-import com.mpatric.mp3agic.*;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 /**
  *
@@ -390,19 +393,20 @@ public class Frame extends javax.swing.JFrame{
             for (int i=0;i<dialog.getTracks().size();i++)
             try{
                 Track track = dialog.getTracks().get(i);
-                AudioFile audioFile = new AudioFile(track.getPath());
+                AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
+                Tag tag = audioFile.getTag();
                 if (dialog.albumModified)
-                    audioFile.setAlbum(track.getAlbum());
+                    tag.setField(FieldKey.ALBUM_ARTIST,track.getAlbum());
                 if (dialog.titleModified)
-                    audioFile.setTitle(track.getName());
+                    tag.setField(FieldKey.TITLE,track.getName());
                 if (dialog.artistModified)
-                    audioFile.setArtist(track.getArtist());
+                    tag.setField(FieldKey.ARTIST,track.getArtist());
                 if (dialog.imageModified)
                     ;//audioFile.setAlbumImage(track.getImg(), "image/png");
                 if (dialog.trackModified)
-                    audioFile.setTrack(track.getNumber());
+                    tag.setField(FieldKey.TRACK,Integer.toString(track.getNumber()));
                 
-                
+                audioFile.commit();
                 Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
                 File file = new File(track.getPath());
                 file.delete();
