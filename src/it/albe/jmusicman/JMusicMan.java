@@ -344,7 +344,12 @@ public class JMusicMan {
                 int progressint = 0;
                 double step = (double)100/(double)(files.size()+1);
                 frame.jProgressBar1.setStringPainted(true);
+                int i=0;
                 for (File file :files){
+                    if (i==24)
+                        i=24;
+                    i++;
+                    
                     frame.jProgressBar1.setString(file.getAbsolutePath());
                     progress += step; 
                     progressint = (int)progress;
@@ -352,10 +357,10 @@ public class JMusicMan {
                     try {
                         AudioFile audioFile = AudioFileIO.read(file);
                         Tag tag = audioFile.getTag();
-                        artist = (tag.getFirst(FieldKey.ARTIST)!="") ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
-                        album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
-                        title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
-                        track = (tag.getFirst(FieldKey.TRACK)!="") ? tag.getFirst(FieldKey.TRACK) : "";
+                        artist = (!"".equals(tag.getFirst(FieldKey.ARTIST))) ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
+                        album = (!"".equals(tag.getFirst(FieldKey.ALBUM))) ? tag.getFirst(FieldKey.ALBUM) : "";
+                        title = (!"".equals(tag.getFirst(FieldKey.TITLE))) ? tag.getFirst(FieldKey.TITLE) : file.getName();
+                        track = (!"".equals(tag.getFirst(FieldKey.TRACK))) ? tag.getFirst(FieldKey.TRACK) : "";
                         if (!("".equals(artist)))
                             organize(file,artist,album,title,track);
                     }    

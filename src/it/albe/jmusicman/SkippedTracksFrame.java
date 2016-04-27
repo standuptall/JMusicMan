@@ -286,11 +286,11 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
                 fileTracks.remove(file);
                 continue;
             }
+           
             Tag tag = audioFile.getTag();
             if (tag==null)
                 tag = audioFile.getTagOrCreateAndSetDefault();
-            if (i==20)
-                i=20;
+           
             String artist = (tag.getFirst(FieldKey.ARTIST)!="") ? tag.getFirst(FieldKey.ARTIST) : "";
             String album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
             String title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
