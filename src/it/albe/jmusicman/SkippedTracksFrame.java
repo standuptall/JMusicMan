@@ -4,21 +4,42 @@
  * and open the template in the editor.
  */
 package it.albe.jmusicman;
-import it.albe.JMusicMan.Track;
+import it.albe.JMusicMan.JMusicMan;
 import java.util.List;
-
+import java.io.File;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import it.albe.JMusicMan.Track;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.*;
+import javax.swing.event.*;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.tag.TagException;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.exceptions.CannotWriteException;
+import org.jaudiotagger.tag.FieldDataInvalidException;
+import org.jaudiotagger.tag.KeyNotFoundException;
 /**
  *
  * @author Alberto
  */
-public class SkippedTracksFrame extends javax.swing.JFrame {
+public class SkippedTracksFrame extends javax.swing.JDialog {
+    List<File> fileTracks;
     List<Track> tracks;
     /**
      * Creates new form SkippedTracksFrame
      */
-    public SkippedTracksFrame(List<Track> tracks) {
-        this.tracks = tracks;
+    public SkippedTracksFrame(java.awt.Frame parent,List<File> tracce) {
+        super(parent,true);
+        this.fileTracks = tracce;
         initComponents();
+        tracks = new ArrayList<>();
+        caricaListaTracce();
+        
     }
 
     /**
@@ -33,27 +54,6 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
         jSplitPane1 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
-        jPanel1 = new javax.swing.JPanel();
-        artistField = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        titleField = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        albumField = new javax.swing.JTextField();
-        jLabel4 = new javax.swing.JLabel();
-        trackNumberField = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        commentField = new javax.swing.JTextArea();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        OKBUtton = new javax.swing.JButton();
-        annullaButton = new javax.swing.JButton();
-        jScrollPane4 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList<>();
-        jScrollPane5 = new javax.swing.JScrollPane();
-        jList3 = new javax.swing.JList<>();
-        jScrollPane6 = new javax.swing.JScrollPane();
-        jList4 = new javax.swing.JList<>();
         jPanel2 = new javax.swing.JPanel();
         artistField1 = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
@@ -69,149 +69,38 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
         jLabel10 = new javax.swing.JLabel();
         OKBUtton1 = new javax.swing.JButton();
         annullaButton1 = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        setTitle("Modifica informazioni tracce con tag non validi");
+        setLocation(new java.awt.Point(500, 200));
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
+        jSplitPane1.setDividerLocation(200);
+
         jScrollPane1.setViewportView(jList1);
 
         jSplitPane1.setLeftComponent(jScrollPane1);
-
-        jLabel1.setText("Artista");
-
-        jLabel2.setText("Titolo");
-
-        jLabel3.setText("Album");
-
-        jLabel4.setText("Numero traccia");
-
-        jLabel5.setText("Commento");
-
-        commentField.setColumns(20);
-        commentField.setRows(5);
-        jScrollPane2.setViewportView(commentField);
-
-        OKBUtton.setText("OK");
-        OKBUtton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                OKBUttonActionPerformed(evt);
-            }
-        });
-
-        annullaButton.setText("Annulla");
-        annullaButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                annullaButtonActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 511, Short.MAX_VALUE)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup()
-                    .addGap(21, 21, 21)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(artistField)
-                        .addComponent(titleField)
-                        .addComponent(albumField)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel1)
-                                .addComponent(jLabel2)
-                                .addComponent(jLabel3)
-                                .addComponent(jLabel4)
-                                .addComponent(jLabel5)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(OKBUtton, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(annullaButton, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(0, 0, Short.MAX_VALUE))
-                        .addComponent(trackNumberField))
-                    .addGap(21, 21, 21)))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 330, Short.MAX_VALUE)
-            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel1Layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(jLabel1)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(artistField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(jLabel2)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(titleField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(jLabel3)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(albumField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(jLabel4)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(trackNumberField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(jLabel5)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addGap(20, 20, 20)
-                            .addComponent(jScrollPane3)))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(annullaButton)
-                        .addComponent(OKBUtton))
-                    .addContainerGap()))
-        );
-
-        jSplitPane1.setRightComponent(jPanel1);
-
-        jList2.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane4.setViewportView(jList2);
-
-        jSplitPane1.setLeftComponent(jScrollPane4);
-
-        jList3.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane5.setViewportView(jList3);
-
-        jSplitPane1.setLeftComponent(jScrollPane5);
-
-        jList4.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane6.setViewportView(jList4);
-
-        jSplitPane1.setLeftComponent(jScrollPane6);
 
         jLabel6.setText("Artista");
 
         jLabel7.setText("Titolo");
 
+        titleField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                titleField1KeyReleased(evt);
+            }
+        });
+
         jLabel8.setText("Album");
 
         jLabel9.setText("Numero traccia");
+
+        trackNumberField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                trackNumberField1FocusLost(evt);
+            }
+        });
 
         commentField1.setColumns(20);
         commentField1.setRows(5);
@@ -233,6 +122,21 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
             }
         });
 
+        jButton1.setText("->");
+        jButton1.setName(""); // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("->");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -244,7 +148,7 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
                         .addComponent(OKBUtton1, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(annullaButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 407, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -254,13 +158,19 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
                                     .addComponent(jLabel8)
                                     .addComponent(jLabel9)
                                     .addComponent(jLabel10)
-                                    .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE))
+                                    .addComponent(jScrollPane8))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(titleField1)
-                            .addComponent(albumField1, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(artistField1)
-                            .addComponent(trackNumberField1))
+                            .addComponent(trackNumberField1)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(albumField1, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(artistField1, javax.swing.GroupLayout.PREFERRED_SIZE, 470, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap())))
         );
         jPanel2Layout.setVerticalGroup(
@@ -269,7 +179,9 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(artistField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(artistField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -277,7 +189,9 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(albumField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(albumField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -287,7 +201,7 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel10)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE))
+                        .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(20, 20, 20)
                         .addComponent(jScrollPane7)))
@@ -306,7 +220,7 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1)
+                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 729, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -318,23 +232,109 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void OKBUttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBUttonActionPerformed
-        this.setVisible(false);
-        
-
-        //image already handled in ActionListener, row 66
-    }//GEN-LAST:event_OKBUttonActionPerformed
-
-    private void annullaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annullaButtonActionPerformed
-        this.setVisible(false);
-        
-    }//GEN-LAST:event_annullaButtonActionPerformed
-
+    private void caricaListaTracce(){
+        DefaultListModel<String> model = new DefaultListModel();
+        jList1.addListSelectionListener((ListSelectionEvent e) -> {
+            if (jList1.getSelectedIndices().length>1){
+                int[] indices;
+                indices = jList1.getSelectedIndices();
+                String artist = tracks.get(jList1.getSelectedIndex()).getArtist();
+                String album = tracks.get(jList1.getSelectedIndex()).getAlbum();
+                for(int i:indices){
+                    if (artist.equals(tracks.get(i).getArtist()))
+                        ;
+                    else artist="";
+                    if (album.equals(tracks.get(i).getAlbum()))
+                        ;
+                    else album="";
+                }
+                artistField1.setText(artist);
+                albumField1.setText(album);
+                titleField1.setText("");
+                commentField1.setText("");
+                trackNumberField1.setText("");
+                titleField1.setEnabled(false);
+                commentField1.setEnabled(false);
+                trackNumberField1.setEnabled(false);
+                return;
+            }
+            
+            else{
+                /* Salvo il contenuto della traccia modificata finora */
+                
+                Track track = tracks.get(jList1.getSelectedIndex());
+                albumField1.setText(track.getAlbum());
+                artistField1.setText(track.getArtist());
+                titleField1.setText(track.getName());
+                commentField1.setText("");
+                trackNumberField1.setText("");
+                titleField1.setEnabled(true);
+                commentField1.setEnabled(true);
+                trackNumberField1.setEnabled(true);
+            }
+        });
+        int i=0;
+        AudioFile audioFile;
+        for(File file :fileTracks){
+            try{
+                audioFile = AudioFileIO.read(file);
+            }
+            catch(Exception ex){
+                fileTracks.remove(file);
+                continue;
+            }
+            Tag tag = audioFile.getTag();
+            String artist = (tag.getFirst(FieldKey.ARTIST)!="") ? tag.getFirst(FieldKey.ARTIST) : "";
+            String album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
+            String title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
+            String track = (tag.getFirst(FieldKey.TRACK)!="") ? tag.getFirst(FieldKey.TRACK) : "";
+            Track traccia = new Track(artist,title,album,file.getAbsolutePath(),track);
+            tracks.add(i, traccia);
+            model.add(i,file.getAbsolutePath().substring(JMusicMan.directory.length(),
+                                                         file.getAbsolutePath().length()-JMusicMan.directory.length()));
+            
+            i++;
+        }
+        this.jList1.setModel(model);
+    }
     private void OKBUtton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBUtton1ActionPerformed
+        for (Track track:tracks){
+            AudioFile af;
+            try{
+                af = AudioFileIO.read(new File(track.getPath()));
+            }
+            catch(Exception ex){
+                continue;
+            }
+            Tag tag = af.getTagOrCreateAndSetDefault();
+            try {
+                tag.addField(FieldKey.ARTIST, track.getArtist());
+            } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                tag.addField(FieldKey.ALBUM, track.getAlbum());
+            } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                tag.addField(FieldKey.TITLE, track.getName());
+            } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                tag.addField(FieldKey.TRACK, track.getNumber());
+            } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                af.commit();
+            } catch (CannotWriteException ex) {
+                Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         this.setVisible(false);
-        
-
+        it.albe.JMusicMan.JMusicMan.update();
         //image already handled in ActionListener, row 66
     }//GEN-LAST:event_OKBUtton1ActionPerformed
 
@@ -342,49 +342,65 @@ public class SkippedTracksFrame extends javax.swing.JFrame {
         this.setVisible(false);
     }//GEN-LAST:event_annullaButton1ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        //tasto memorizza artista
+        int[] indici = jList1.getSelectedIndices();
+        for(int i:indici){
+            Track track = tracks.get(i);
+            track.setArtist(artistField1.getText());
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        //tasto memorizza album
+        int[] indici = jList1.getSelectedIndices();
+        for(int i:indici){
+            Track track = tracks.get(i);
+            track.setAlbum(albumField1.getText());
+        }
+        
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void trackNumberField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_trackNumberField1FocusLost
+        try{
+            Integer.parseInt(trackNumberField1.getText());  //vediamo se da' errore
+            tracks.get(jList1.getSelectedIndex()).setName(titleField1.getText());
+        }
+        catch(Exception e){
+            
+        }
+        
+        
+    }//GEN-LAST:event_trackNumberField1FocusLost
+
+    private void titleField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_titleField1KeyReleased
+        tracks.get(jList1.getSelectedIndex()).setName(titleField1.getText());
+    }//GEN-LAST:event_titleField1KeyReleased
+
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton OKBUtton;
     private javax.swing.JButton OKBUtton1;
-    private javax.swing.JTextField albumField;
     private javax.swing.JTextField albumField1;
-    private javax.swing.JButton annullaButton;
     private javax.swing.JButton annullaButton1;
-    private javax.swing.JTextField artistField;
     private javax.swing.JTextField artistField1;
-    private javax.swing.JTextArea commentField;
     private javax.swing.JTextArea commentField1;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JList<String> jList1;
-    private javax.swing.JList<String> jList2;
-    private javax.swing.JList<String> jList3;
-    private javax.swing.JList<String> jList4;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
-    private javax.swing.JScrollPane jScrollPane4;
-    private javax.swing.JScrollPane jScrollPane5;
-    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JSplitPane jSplitPane1;
-    private javax.swing.JTextField titleField;
     private javax.swing.JTextField titleField1;
-    private javax.swing.JTextField trackNumberField;
     private javax.swing.JTextField trackNumberField1;
     // End of variables declaration//GEN-END:variables
 }

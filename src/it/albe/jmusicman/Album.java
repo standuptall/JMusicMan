@@ -29,6 +29,7 @@ public class Album {
         }
         return null;
     }
+    /*
     public Track getTrackByNumber(int number){
         for (int i=0;i<trackList.size();i++){
             Track track = (Track)trackList.get(i);
@@ -36,7 +37,7 @@ public class Album {
                     return track;
         }
         return null;
-    }
+    }*/
     public int getNumberOfTracks(){
         return trackList.size();
     }

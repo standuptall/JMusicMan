@@ -3,18 +3,18 @@ package it.albe.JMusicMan;
 
 
 public class Track {
-    private String name, artist,album,path;
-    private int Duration,number;
+    private String name, artist,album,path,track;
+    private int Duration;
     private byte[] img;
     public Track () {
 
     }
-    public Track(String artista, String nome, String album,String path,int n) {
+    public Track(String artista, String nome, String album,String path,String n) {
         this.name = nome;
         this.artist = artista;
         this.album = album;
         this.path = path;
-        this.number = n;
+        this.track = n;
     }
     public Track(String artista, String nome, String album,String path,byte[] img) {
         this.name = nome;
@@ -23,14 +23,14 @@ public class Track {
         this.path = path;
         this.img = img;
     }
-    public Track(String artista, String nome, String album,int count) {
+    public Track(String artista, String nome, String album,String track) {
         this.name = nome;
         this.artist = artista;
         this.album = album;
-        this.number = count;
+        this.track = track;
     }
-    public void setNumber(int n) {
-        this.number = n;
+    public void setTrack(String n) {
+        this.track = n;
     }
 
     public int getDuration() {
@@ -68,14 +68,11 @@ public class Track {
         return artist;
     }
 
-    public int getNumber() {
-        return number;
+    public String getNumber() {
+        return track;
     }
     public String toString(){
-        if (number>0)
-            return String.format("%02d",number)+" - " + name;
-        else
-            return name;
+        return track+" - " + name;
     }
     public String getPath(){
         return path;

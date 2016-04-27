@@ -42,8 +42,8 @@ public class AudioFile {
                     title = (id3v2Tag.getTitle()!=null) ? id3v2Tag.getTitle() : file.getName();
                     track = (id3v2Tag.getTrack()!=null) ? Integer.parseInt(id3v2Tag.getTrack().replaceAll("[^0-9]", "")) : 0;
                     albumImage = id3v2Tag.getAlbumImage();
-                    if (!"".equals(artist))
-                            organize(file,artist,album,title,track);
+                    /*if (!"".equals(artist))
+                            organize(file,artist,album,title,track);*/
                 }
                 else if (mp3file.hasId3v1Tag()){
                     ID3v1 id3v1Tag = mp3file.getId3v2Tag();

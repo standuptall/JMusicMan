@@ -404,10 +404,10 @@ public class Frame extends javax.swing.JFrame{
                 if (dialog.imageModified)
                     ;//audioFile.setAlbumImage(track.getImg(), "image/png");
                 if (dialog.trackModified)
-                    tag.setField(FieldKey.TRACK,Integer.toString(track.getNumber()));
+                    tag.setField(FieldKey.TRACK,track.getNumber());
                 
                 audioFile.commit();
-                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+".mp3",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+"_temp",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
                 File file = new File(track.getPath());
                 file.delete();
                 JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), track.getNumber());

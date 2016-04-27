@@ -62,7 +62,7 @@ public class EditInfo extends javax.swing.JDialog {
         artistField.setText(track.getArtist());
         albumField.setText(track.getAlbum());
         titleField.setText(track.getName());
-        trackNumberField.setText(Integer.toString(track.getNumber()));
+        trackNumberField.setText(track.getNumber());
         try{
             AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
             Tag tag = audioFile.getTag();
@@ -209,6 +209,7 @@ public class EditInfo extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Modifica informazioni");
+        setLocation(it.albe.JMusicMan.JMusicMan.frame.getLocation());
 
         jLabel1.setText("Artista");
 
@@ -331,9 +332,9 @@ public class EditInfo extends javax.swing.JDialog {
                 titleModified = true;
                 track.setName(titleField.getText());
             }
-            if (!Integer.toString(track.getNumber()).equals(trackNumberField.getText())){
+            if (track.getNumber().equals(trackNumberField.getText())){
                 trackModified = true;
-                track.setNumber(Integer.parseInt(trackNumberField.getText()));
+                track.setTrack(trackNumberField.getText());
             }
         }
 

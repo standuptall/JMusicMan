@@ -91,7 +91,7 @@ public class JMusicMan {
                     while (iterator3.hasNext()){
                         Element track = (Element)iterator3.next();
                         Album alb = (Album)albumNode.getUserObject();
-                        int number = (track.getChild("number")!=null) ? Integer.parseInt(track.getChild("number").getText()) : 0;
+                        String number = (track.getChild("number")!=null) ? track.getChild("number").getText() : "";
                         alb.addTrack(new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path"),number));
                     }
                     
@@ -126,7 +126,7 @@ public class JMusicMan {
     public static ArrayList<Track> findTracksToCopy(ArrayList<Element> disp, ArrayList<Element> locale){
         ArrayList<Track> lista = new ArrayList<Track>();
         String name, artist, album, path;
-        int number;
+        String number;
         int sizel = locale.size();
         int sized = disp.size();
         int c;
@@ -141,7 +141,7 @@ public class JMusicMan {
                 artist = locale.get(i).getParentElement().getParentElement().getAttributeValue("name");
                 album = locale.get(i).getParentElement().getAttributeValue("name");
                 path = locale.get(i).getChild("path").getText();
-                number = (locale.get(i).getChild("number")!=null) ? Integer.parseInt(locale.get(i).getChild("number").getText()) : 0;
+                number = (locale.get(i).getChild("number")!=null) ? locale.get(i).getChild("number").getText() : "";
                 lista.add(new Track(artist,name,album,path,number));
             }
         }
@@ -200,20 +200,15 @@ public class JMusicMan {
      *  file: file originale con posizione originale                                       *
      **************************************************************************************/
     
-    public static void organize(File file,String artist,String album, String title, int track){
-        try {
-            if (album.equals("")||title.equals(""))
-                throw new it.albe.JMusicMan.EmptyTagException("I tag album e titolo devono essere riempiti");
-        }
-        catch(it.albe.JMusicMan.EmptyTagException e){
-                IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
-                return;
-            }
+    public static void organize(File file,String artist,String album, String title, String track) throws it.albe.JMusicMan.EmptyTagException{
+     
+        if (album.equals("")||title.equals(""))
+            throw new it.albe.JMusicMan.EmptyTagException("I tag album e titolo devono essere riempiti");
         String fileTitle;
         String trackNo = "";
         fileTitle = "";
-        if (track!=0)
-            trackNo = String.format("%02d",track) +" - ";
+        if (track!="")
+            trackNo = track +" - ";
         if (file.getAbsolutePath().endsWith(".mp3"))
             fileTitle = trackNo+checkFileName(title)+".mp3";
         else if (file.getAbsolutePath().endsWith(".flac"))
@@ -226,7 +221,6 @@ public class JMusicMan {
                 IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
                 return;
             }
-            
         File audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
         audioFile.mkdirs();
         audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
@@ -235,7 +229,7 @@ public class JMusicMan {
                 audioFile.delete();
                 java.io.FileInputStream reader = new FileInputStream(file);
                 FileOutputStream writer = new FileOutputStream(audioFile);
-                byte[] bytes =  new byte[1024];
+                byte[] bytes =  new byte[102400];
                 int numbytes;
                 while ((numbytes = reader.read(bytes))>0){
                     writer.write(bytes,0,numbytes);
@@ -254,55 +248,55 @@ public class JMusicMan {
         
         try{
             List artists =rootElement.getChild("library").getChildren();
-             Iterator iterator = artists.iterator();
-             Element artistElement = null;
-             Element albumElement = null;
-             Element trackElement;
-             /*controllo se c'è l'artista */
-             while (iterator.hasNext()){
-                 Element element = (Element)iterator.next();
-                 if (element.getAttributeValue("name").equals(artist)){
-                     artistElement = element;
-                     break;
-                 }
-             }
-             /* se è stato trovato...*/
-             if (artistElement != null) {
-                 /*controllo se c'è l'album*/
-                 List albums = artistElement.getChildren();
-                 iterator = albums.iterator();
-                 while (iterator.hasNext()){
-                    Element element = (Element)iterator.next();
-                    if (element.getAttributeValue("name").equals(album))
-                        albumElement = element;
-                 }
-                 if (albumElement==null){
-                     albumElement = new Element("album");
-                     albumElement.setAttribute("name",album);
-                     artistElement.addContent(albumElement);
-                 }
-             }
-             else {
-                 artistElement = new Element("artist");
-                 artistElement.setAttribute("name",artist);
-                 rootElement.getChild("library").addContent(artistElement);
-                 albumElement = new Element("album");
-                 albumElement.setAttribute("name",album);
-                 artistElement.addContent(albumElement);
-             }
+            Iterator iterator = artists.iterator();
+            Element artistElement = null;
+            Element albumElement = null;
+            Element trackElement;
+            /*controllo se c'è l'artista */
+            while (iterator.hasNext()){
+                Element element = (Element)iterator.next();
+                if (element.getAttributeValue("name").equals(artist)){
+                    artistElement = element;
+                    break;
+                }
+            }
+            /* se è stato trovato...*/
+            if (artistElement != null) {
+                /*controllo se c'è l'album*/
+                List albums = artistElement.getChildren();
+                iterator = albums.iterator();
+                while (iterator.hasNext()){
+                   Element element = (Element)iterator.next();
+                   if (element.getAttributeValue("name").equals(album))
+                       albumElement = element;
+                }
+                if (albumElement==null){
+                    albumElement = new Element("album");
+                    albumElement.setAttribute("name",album);
+                    artistElement.addContent(albumElement);
+                }
+            }
+            else {
+                artistElement = new Element("artist");
+                artistElement.setAttribute("name",artist);
+                rootElement.getChild("library").addContent(artistElement);
+                albumElement = new Element("album");
+                albumElement.setAttribute("name",album);
+                artistElement.addContent(albumElement);
+            }
              
-             trackElement = new Element("track");
-             Element element = new Element("name");
-             trackElement.addContent(element);
-             element.setText(title);
-             if (track>0){
-                 element = new Element("number");
-                 element.setText(Integer.toString(track));
-                 trackElement.addContent(element);
-             }
-             element = new Element("path");
-             trackElement.addContent(element);
-             element.setText(audioFile.getAbsolutePath());
+            trackElement = new Element("track");
+            Element element = new Element("name");
+            trackElement.addContent(element);
+            element.setText(title);
+            if (track!=""){
+                element = new Element("number");
+                element.setText(track);
+                trackElement.addContent(element);
+            }
+            element = new Element("path");
+            trackElement.addContent(element);
+            element.setText(audioFile.getAbsolutePath());
             albumElement.addContent(trackElement);
             java.util.Date data = new java.util.Date();
             rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
@@ -320,7 +314,7 @@ public class JMusicMan {
     }
     /********************************************************************************************************
      * Trova tutti i files mp3 presenti nella cartella /Music del PC e li organizza nelle apposite cartelle,*
-     * ricreando pure il file XML                                                                           *
+     * ricreando pure il file XML. Risponde alla funzione "Aggiorna"                                                                           *
      ********************************************************************************************************/
     public static void update(){
         javax.swing.SwingWorker<Void,Void> sw = new javax.swing.SwingWorker<Void,Void>() {
@@ -337,33 +331,44 @@ public class JMusicMan {
                 element = new Element("library");
                 rootElement.addContent(element);
                 document = new Document(rootElement);
+                List<File> skippedTracks = new ArrayList<File>();
                 String artist = "";
                 String album = "";
                 String title = "";
-                int track = 0;
-                try {
-                    ArrayList<File> files = findFiles(directory);
-                    double progress = 0;
-                    int progressint = 0;
-                    double step = (double)100/(double)(files.size()+1);
-                    frame.jProgressBar1.setStringPainted(true);
-                    for (File file :files){
-                        frame.jProgressBar1.setString(file.getAbsolutePath());
-                        progress += step; 
-                        progressint = (int)progress;
-                        frame.jProgressBar1.setValue(progressint);
+                String track = "";
+             //   try {
+                ArrayList<File> files = findFiles(directory);
+                double progress = 0;
+                int progressint = 0;
+                double step = (double)100/(double)(files.size()+1);
+                frame.jProgressBar1.setStringPainted(true);
+                for (File file :files){
+                    frame.jProgressBar1.setString(file.getAbsolutePath());
+                    progress += step; 
+                    progressint = (int)progress;
+                    frame.jProgressBar1.setValue(progressint);
+                    try {
                         AudioFile audioFile = AudioFileIO.read(file);
                         Tag tag = audioFile.getTag();
-                        artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
-                        album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
-                        title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : file.getName();
-                        track = (tag.getFirst(FieldKey.TRACK)!=null) ? Integer.parseInt(tag.getFirst(FieldKey.TRACK)) : 0;
-                        if (!"".equals(artist))
+                        artist = (tag.getFirst(FieldKey.ARTIST)!="") ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
+                        album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
+                        title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
+                        track = (tag.getFirst(FieldKey.TRACK)!="") ? tag.getFirst(FieldKey.TRACK) : "";
+                        if (!("".equals(artist)))
                             organize(file,artist,album,title,track);
+                    }    
+                    catch(Exception e){
+                        skippedTracks.add(file);
                     }
-                    frame.jProgressBar1.setString("Pronto");
+                        
                 }
-                catch(java.lang.NumberFormatException e){
+                if (skippedTracks.size()>0){
+                    it.albe.jmusicman.SkippedTracksFrame skippedFrame = new it.albe.jmusicman.SkippedTracksFrame(frame,skippedTracks);
+                    skippedFrame.setVisible(true);
+                }
+                frame.jProgressBar1.setString("Pronto");
+              //  }
+            /*    catch(java.lang.NumberFormatException e){
                     IO.err(frame, "errore: "+e.getMessage()+artist);
                     e.printStackTrace();
                             
@@ -371,7 +376,7 @@ public class JMusicMan {
                 catch(Exception e){
                     IO.err(frame, "errore: "+e.getMessage()+artist);
                     e.printStackTrace();
-                }
+                }*/
 
                 
                 return null;
@@ -394,7 +399,7 @@ public class JMusicMan {
             element.setText(newTrack.getName());
             trackElement.addContent(element);
             element = new Element("number");
-            element.setText(Integer.toString(newTrack.getNumber()));
+            element.setText(newTrack.getNumber());
             trackElement.addContent(element);
             element = new Element("path");
             element.setText(newTrack.getPath());
