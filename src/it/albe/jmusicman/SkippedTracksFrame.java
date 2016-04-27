@@ -96,9 +96,12 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
 
         jLabel9.setText("Numero traccia");
 
-        trackNumberField1.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                trackNumberField1FocusLost(evt);
+        trackNumberField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                trackNumberField1KeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                trackNumberField1KeyTyped(evt);
             }
         });
 
@@ -284,6 +287,10 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
                 continue;
             }
             Tag tag = audioFile.getTag();
+            if (tag==null)
+                tag = audioFile.getTagOrCreateAndSetDefault();
+            if (i==20)
+                i=20;
             String artist = (tag.getFirst(FieldKey.ARTIST)!="") ? tag.getFirst(FieldKey.ARTIST) : "";
             String album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
             String title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
@@ -292,7 +299,6 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             tracks.add(i, traccia);
             model.add(i,file.getAbsolutePath().substring(JMusicMan.directory.length(),
                                                          file.getAbsolutePath().length()-JMusicMan.directory.length()));
-            
             i++;
         }
         this.jList1.setModel(model);
@@ -361,21 +367,19 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void trackNumberField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_trackNumberField1FocusLost
-        try{
-            Integer.parseInt(trackNumberField1.getText());  //vediamo se da' errore
-            tracks.get(jList1.getSelectedIndex()).setName(titleField1.getText());
-        }
-        catch(Exception e){
-            
-        }
-        
-        
-    }//GEN-LAST:event_trackNumberField1FocusLost
-
     private void titleField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_titleField1KeyReleased
         tracks.get(jList1.getSelectedIndex()).setName(titleField1.getText());
     }//GEN-LAST:event_titleField1KeyReleased
+
+    private void trackNumberField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_trackNumberField1KeyReleased
+
+        tracks.get(jList1.getSelectedIndex()).setTrack(trackNumberField1.getText());
+    }//GEN-LAST:event_trackNumberField1KeyReleased
+
+    private void trackNumberField1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_trackNumberField1KeyTyped
+        if (evt.getKeyChar()<48||evt.getKeyChar()>57)
+            trackNumberField1.setText(trackNumberField1.getText().substring(0,trackNumberField1.getText().length()-1));
+    }//GEN-LAST:event_trackNumberField1KeyTyped
 
     /**
      * @param args the command line arguments

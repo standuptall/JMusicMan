@@ -4,10 +4,10 @@
  */
 package it.albe.JMusicMan;
 
+import static it.albe.JMusicMan.JMusicMan.checkFileName;
 import it.albe.utils.IO;
 import java.awt.Toolkit;
 import java.util.*;
-import java.util.Iterator;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
@@ -396,7 +396,7 @@ public class Frame extends javax.swing.JFrame{
                 AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
                 Tag tag = audioFile.getTag();
                 if (dialog.albumModified)
-                    tag.setField(FieldKey.ALBUM_ARTIST,track.getAlbum());
+                    tag.setField(FieldKey.ALBUM,track.getAlbum());
                 if (dialog.titleModified)
                     tag.setField(FieldKey.TITLE,track.getName());
                 if (dialog.artistModified)
@@ -407,11 +407,11 @@ public class Frame extends javax.swing.JFrame{
                     tag.setField(FieldKey.TRACK,track.getNumber());
                 
                 audioFile.commit();
-                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath()+"_temp",track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
-                File file = new File(track.getPath());
-                file.delete();
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
                 JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), track.getNumber());
                 JMusicMan.updateTrack(newTrack, dialog.editResult());
+                File file = new File(track.getPath());
+                file.delete();
             }
             catch (Exception e){
                 System.out.print(e.getMessage());

@@ -219,6 +219,12 @@ public class EditInfo extends javax.swing.JDialog {
 
         jLabel4.setText("Numero traccia");
 
+        trackNumberField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                trackNumberFieldKeyReleased(evt);
+            }
+        });
+
         commentField.setColumns(20);
         commentField.setRows(5);
         jScrollPane1.setViewportView(commentField);
@@ -345,6 +351,11 @@ public class EditInfo extends javax.swing.JDialog {
         this.setVisible(false);
         response = 2;
     }//GEN-LAST:event_annullaButtonActionPerformed
+
+    private void trackNumberFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_trackNumberFieldKeyReleased
+        if (evt.getKeyChar()<48||evt.getKeyChar()>57)
+            trackNumberField.setText(trackNumberField.getText().substring(0,trackNumberField.getText().length()-1));
+    }//GEN-LAST:event_trackNumberFieldKeyReleased
 
     /**
      * @param args the command line arguments

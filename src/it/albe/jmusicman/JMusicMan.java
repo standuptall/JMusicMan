@@ -30,12 +30,14 @@ public class JMusicMan {
     public static Element rootElement;  //rootElement del documento XML
     public static String directory = System.getProperty("user.home")+"\\Music\\";  
     public static Document document;
-    public static File root = null;      //root directory del dispositivo
+    public static File root;      //root directory del dispositivo
     public static long lastedit;         //timestamp dell'ultima modifica del file xml
-    public static String playerDir = ""; //directory del player
-
-    public static Frame frame = new Frame();
+    public static String playerDir; //directory del player
+    public static Frame frame;
     public static void main(String[] args) {
+        playerDir = "";
+        root = null;
+        frame = new Frame();
         frame.setVisible(true);
         loadLibrary();
     }
@@ -367,18 +369,7 @@ public class JMusicMan {
                     skippedFrame.setVisible(true);
                 }
                 frame.jProgressBar1.setString("Pronto");
-              //  }
-            /*    catch(java.lang.NumberFormatException e){
-                    IO.err(frame, "errore: "+e.getMessage()+artist);
-                    e.printStackTrace();
-                            
-                }
-                catch(Exception e){
-                    IO.err(frame, "errore: "+e.getMessage()+artist);
-                    e.printStackTrace();
-                }*/
-
-                
+            
                 return null;
                 }
         };
