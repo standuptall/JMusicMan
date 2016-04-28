@@ -289,7 +289,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
            
             Tag tag = audioFile.getTag();
             if (tag==null)
-                tag = audioFile.getTagOrCreateAndSetDefault();
+                tag = audioFile.createDefaultTag();
            
             String artist = (tag.getFirst(FieldKey.ARTIST)!="") ? tag.getFirst(FieldKey.ARTIST) : "";
             String album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
@@ -312,7 +312,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             catch(Exception ex){
                 continue;
             }
-            Tag tag = af.getTagOrCreateAndSetDefault();
+            Tag tag = af.createDefaultTag();
             try {
                 tag.addField(FieldKey.ARTIST, track.getArtist());
             } catch (KeyNotFoundException | FieldDataInvalidException ex) {
@@ -334,11 +334,13 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
+                af.setTag(tag);
                 af.commit();
             } catch (CannotWriteException ex) {
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        
         this.setVisible(false);
         it.albe.JMusicMan.JMusicMan.update();
         //image already handled in ActionListener, row 66
