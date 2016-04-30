@@ -27,7 +27,7 @@ public class EditInfo extends javax.swing.JDialog {
     private List<Track> tracks;
     private int response;
     public boolean multipleEdit;
-    public boolean artistModified, titleModified, albumModified, imageModified, trackModified;
+    public boolean artistModified, titleModified, albumModified, imageModified, trackModified,commentModified;
 
     /**
      * Creates new form EditInfo
@@ -62,6 +62,7 @@ public class EditInfo extends javax.swing.JDialog {
         artistField.setText(track.getArtist());
         albumField.setText(track.getAlbum());
         titleField.setText(track.getName());
+        commentField.setText(track.getComment());
         trackNumberField.setText(track.getNumber());
         try{
             AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
@@ -206,6 +207,7 @@ public class EditInfo extends javax.swing.JDialog {
         jLabel6 = new javax.swing.JLabel();
         OKBUtton = new javax.swing.JButton();
         annullaButton = new javax.swing.JButton();
+        resetTagButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Modifica informazioni");
@@ -234,6 +236,7 @@ public class EditInfo extends javax.swing.JDialog {
         jLabel6.setText("Immagine");
 
         OKBUtton.setText("OK");
+        OKBUtton.setToolTipText("");
         OKBUtton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 OKBUttonActionPerformed(evt);
@@ -244,6 +247,14 @@ public class EditInfo extends javax.swing.JDialog {
         annullaButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 annullaButtonActionPerformed(evt);
+            }
+        });
+
+        resetTagButton.setText("Reset tag");
+        resetTagButton.setName(""); // NOI18N
+        resetTagButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetTagButtonActionPerformed(evt);
             }
         });
 
@@ -276,6 +287,8 @@ public class EditInfo extends javax.swing.JDialog {
                                 .addComponent(jScrollPane2))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(OKBUtton, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(resetTagButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(annullaButton, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -310,9 +323,10 @@ public class EditInfo extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(annullaButton)
-                    .addComponent(OKBUtton)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(OKBUtton)
+                    .addComponent(resetTagButton)
+                    .addComponent(annullaButton)))
         );
 
         pack();
@@ -338,15 +352,19 @@ public class EditInfo extends javax.swing.JDialog {
                 titleModified = true;
                 track.setName(titleField.getText());
             }
-            if (track.getNumber().equals(trackNumberField.getText())){
+            if (!track.getNumber().equals(trackNumberField.getText())){
                 trackModified = true;
                 track.setTrack(trackNumberField.getText());
+            }
+            if (!track.getComment().equals(commentField.getText())){
+                commentModified = true;
+                track.setComment(commentField.getText());
             }
         }
 
         //image already handled in ActionListener, row 66
     }//GEN-LAST:event_OKBUttonActionPerformed
-
+    
     private void annullaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annullaButtonActionPerformed
         this.setVisible(false);
         response = 2;
@@ -357,47 +375,36 @@ public class EditInfo extends javax.swing.JDialog {
             trackNumberField.setText(trackNumberField.getText().substring(0,trackNumberField.getText().length()-1));
     }//GEN-LAST:event_trackNumberFieldKeyReleased
 
+    private void resetTagButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetTagButtonActionPerformed
+        this.setVisible(false);
+        response = 3;
+        albumModified = true;
+        track.setAlbum(albumField.getText());
+        for(int i=0;i<tracks.size();i++)
+            tracks.get(i).setAlbum(albumField.getText());
+        
+        artistModified = true;
+        track.setArtist(artistField.getText());
+        for(int i=0;i<tracks.size();i++)
+            tracks.get(i).setArtist(artistField.getText());
+        
+        if (!multipleEdit){
+            titleModified = true;
+            track.setName(titleField.getText());
+            
+            trackModified = true;
+            track.setTrack(trackNumberField.getText());
+            
+            commentModified = true;
+            track.setComment(commentField.getText());
+            
+        }
+    }//GEN-LAST:event_resetTagButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(EditInfo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(EditInfo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(EditInfo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(EditInfo.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                EditInfo dialog = new EditInfo(new javax.swing.JFrame(), true,null);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton OKBUtton;
     private javax.swing.JTextField albumField;
@@ -412,6 +419,7 @@ public class EditInfo extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton resetTagButton;
     private javax.swing.JTextField titleField;
     private javax.swing.JTextField trackNumberField;
     // End of variables declaration//GEN-END:variables

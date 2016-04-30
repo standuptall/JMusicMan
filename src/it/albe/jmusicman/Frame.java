@@ -405,13 +405,48 @@ public class Frame extends javax.swing.JFrame{
                     ;//audioFile.setAlbumImage(track.getImg(), "image/png");
                 if (dialog.trackModified)
                     tag.setField(FieldKey.TRACK,track.getNumber());
+                if (dialog.commentModified)
+                    tag.setField(FieldKey.COMMENT,track.getComment());
                 
                 audioFile.commit();
                 Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
-                JMusicMan.organize(new File(newTrack.getPath()), track.getArtist(), track.getAlbum(), track.getName(), track.getNumber());
+                newTrack.setComment(track.getComment());
+                JMusicMan.organize(new File(newTrack.getPath()));
                 JMusicMan.updateTrack(newTrack, dialog.editResult());
                 File file = new File(track.getPath());
-                file.delete();
+                //file.delete();
+            }
+            catch (Exception e){
+                System.out.print(e.getMessage());
+            }
+            dialog.dispose();
+        } 
+        else if (dialog.getResponse()==3){   //se hai premuto Reset tag...
+            for (int i=0;i<dialog.getTracks().size();i++)
+            try{
+                Track track = dialog.getTracks().get(i);
+                AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
+                Tag tag = audioFile.createDefaultTag(); 
+                if (dialog.albumModified)
+                    tag.setField(FieldKey.ALBUM,track.getAlbum());
+                if (dialog.titleModified)
+                    tag.setField(FieldKey.TITLE,track.getName());
+                if (dialog.artistModified)
+                    tag.setField(FieldKey.ARTIST,track.getArtist());
+                if (dialog.imageModified)
+                    ;//audioFile.setAlbumImage(track.getImg(), "image/png");
+                if (dialog.trackModified)
+                    tag.setField(FieldKey.TRACK,track.getNumber());
+                if (dialog.commentModified)
+                    tag.setField(FieldKey.COMMENT,track.getComment());
+                audioFile.setTag(tag);
+                audioFile.commit();
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
+                newTrack.setComment(track.getComment());
+                JMusicMan.organize(new File(newTrack.getPath()));
+                JMusicMan.updateTrack(newTrack, dialog.editResult());
+                File file = new File(track.getPath());
+                //file.delete();
             }
             catch (Exception e){
                 System.out.print(e.getMessage());

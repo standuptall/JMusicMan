@@ -58,6 +58,8 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="OKBUtton" min="-2" pref="73" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
+                      <Component id="resetTagButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="annullaButton" min="-2" pref="75" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
@@ -98,9 +100,10 @@
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="annullaButton" min="-2" max="-2" attributes="0"/>
-                  <Component id="OKBUtton" alignment="0" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="OKBUtton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="resetTagButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="annullaButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
       </Group>
@@ -170,6 +173,7 @@
     <Component class="javax.swing.JButton" name="OKBUtton">
       <Properties>
         <Property name="text" type="java.lang.String" value="OK"/>
+        <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="OKBUttonActionPerformed"/>
@@ -181,6 +185,15 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="annullaButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="resetTagButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Reset tag"/>
+        <Property name="name" type="java.lang.String" value="" noResource="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resetTagButtonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

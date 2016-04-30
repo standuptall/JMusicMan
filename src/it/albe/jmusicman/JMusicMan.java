@@ -202,10 +202,25 @@ public class JMusicMan {
      *  file: file originale con posizione originale                                       *
      **************************************************************************************/
     
-    public static void organize(File file,String artist,String album, String title, String track) throws it.albe.JMusicMan.EmptyTagException{
+    public static void organize(File file) throws it.albe.JMusicMan.EmptyTagException{
      
-        if (album.equals("")||title.equals(""))
-            throw new it.albe.JMusicMan.EmptyTagException("I tag album e titolo devono essere riempiti");
+        String title = "";
+        String artist = "";
+        String album = "";
+        String track = "";
+        AudioFile af = null;
+        try {
+            af = AudioFileIO.read(file);
+        }
+        catch (Exception e) {
+            System.out.print("file skippato: "+file.getAbsolutePath());
+            return;
+        }
+        Tag tag = af.getTag();
+        title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : "";
+        artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "";
+        album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
+        track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
         String fileTitle;
         String trackNo = "";
         fileTitle = "";
@@ -224,6 +239,8 @@ public class JMusicMan {
                 return;
             }
         File audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
+        if (audioFile.equals(file))
+            return;
         audioFile.mkdirs();
         audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
         try{
@@ -312,7 +329,7 @@ public class JMusicMan {
         catch(IOException e){
             IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
         }
-        loadLibrary();
+        //loadLibrary();
     }
     /********************************************************************************************************
      * Trova tutti i files mp3 presenti nella cartella /Music del PC e li organizza nelle apposite cartelle,*
@@ -357,12 +374,12 @@ public class JMusicMan {
                     try {
                         AudioFile audioFile = AudioFileIO.read(file);
                         Tag tag = audioFile.getTag();
-                        artist = (!"".equals(tag.getFirst(FieldKey.ARTIST))) ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
-                        album = (!"".equals(tag.getFirst(FieldKey.ALBUM))) ? tag.getFirst(FieldKey.ALBUM) : "";
-                        title = (!"".equals(tag.getFirst(FieldKey.TITLE))) ? tag.getFirst(FieldKey.TITLE) : file.getName();
-                        track = (!"".equals(tag.getFirst(FieldKey.TRACK))) ? tag.getFirst(FieldKey.TRACK) : "";
+                        artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "Sconosciuto";
+                        album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
+                        title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : file.getName();
+                        track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
                         if (!("".equals(artist)))
-                            organize(file,artist,album,title,track);
+                            organize(file);
                     }    
                     catch(Exception e){
                         skippedTracks.add(file);
@@ -374,7 +391,7 @@ public class JMusicMan {
                     skippedFrame.setVisible(true);
                 }
                 frame.jProgressBar1.setString("Pronto");
-            
+                loadLibrary();
                 return null;
                 }
         };
