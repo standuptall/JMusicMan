@@ -11,7 +11,6 @@ import org.jdom.*;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.*;
 import javax.swing.tree.*;
-import com.mpatric.mp3agic.*;
 import java.util.ArrayList;
 import org.jdom.filter.ElementFilter;
 import org.jaudiotagger.audio.AudioFile;
@@ -58,8 +57,10 @@ public class JMusicMan {
                 else if (IO.confirm(frame, "I brani verranno ordinati nella cartella Musica come:\n"
                         + "[artista]/[album]/[numero traccia] - [titolo].mp3. Procedere?")>0)
                         System.exit(0);
-            else 
+            else {
                 update();
+                return;
+            }
             rootElement = document.getRootElement();
             Element lasteditElement = rootElement.getChild("lastedit");
             lastedit = Long.valueOf(lasteditElement.getText());
@@ -85,7 +86,7 @@ public class JMusicMan {
                 while(iterator2.hasNext()){
                     Element album = (Element)iterator2.next();
                     DefaultMutableTreeNode albumNode = new DefaultMutableTreeNode(album.getAttributeValue("name"));
-                    String albumName = (albumNode.toString()!="") ? albumNode.toString() : "Album senza nome";
+                    String albumName = (!"".equals(albumNode.toString())) ? albumNode.toString() : "Album senza nome";
                     albumNode.setUserObject(new Album(artistNode.toString(),albumName));
                     artistNode.add(albumNode);
                     List tracks = album.getChildren();
@@ -355,8 +356,7 @@ public class JMusicMan {
                 String album = "";
                 String title = "";
                 String track = "";
-             //   try {
-                ArrayList<File> files = findFiles(directory);
+                List<File> files = findFiles(directory);
                 double progress = 0;
                 int progressint = 0;
                 double step = (double)100/(double)(files.size()+1);
@@ -392,6 +392,11 @@ public class JMusicMan {
                 }
                 frame.jProgressBar1.setString("Pronto");
                 loadLibrary();
+                files = deleteEmptyDirectories(directory);
+                if (!files.isEmpty()){
+                    it.albe.jmusicman.NotEmptyDirectories dialog = new it.albe.jmusicman.NotEmptyDirectories(frame,files);
+                    dialog.setVisible(true);
+                }
                 return null;
                 }
         };
@@ -589,6 +594,36 @@ public class JMusicMan {
         }
         return false;
     }
+    /**********************************************************************************************************
+     * ritorna le directory che non sono vuote perché hanno file diversi dai file supportati da JMusicMan
+     *********************************************************************************************************/
+    public static ArrayList<File> deleteEmptyDirectories(String dir){
+        ArrayList<String> list = new ArrayList<String>();
+        File dirFile = new File (dir);
+        File[] filesAndDirectories = null;
+        ArrayList<File> files = new ArrayList<File>();
+        if (dirFile.isDirectory()){
+            filesAndDirectories = dirFile.listFiles();
+            for (int i=0;i<filesAndDirectories.length;i++){
+                if (filesAndDirectories[i].isDirectory()){
+                        files.addAll(deleteEmptyDirectories(filesAndDirectories[i].getAbsolutePath()));
+                }
+                else {
+                    if (!(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".MP3"))&&
+                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".FLAC"))&&
+                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".XML"))&&
+                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".INI")))
+                        if (files.size()>0){
+                            if (!files.get(files.size()-1).getAbsolutePath().equals(filesAndDirectories[i].getParentFile().getAbsolutePath()))
+                                files.add(filesAndDirectories[i].getParentFile());
+                        }
+                        else
+                            files.add(filesAndDirectories[i].getParentFile());
+                }
+            }
+        }
+        return files;
+    }
     /************************************************************************
      * Trova ricorsivamente tutti i file mp3 contenuti nella directory dir  *
      ***********************************************************************/
@@ -596,7 +631,6 @@ public class JMusicMan {
         File dirFile = new File (dir);
         File[] filesAndDirectories = null;
         ArrayList<File> files = new ArrayList<File>();
-        int count = 0;
         if (dirFile.isDirectory()){
             filesAndDirectories = dirFile.listFiles();
             for (int i=0;i<filesAndDirectories.length;i++){
@@ -604,8 +638,8 @@ public class JMusicMan {
                         files.addAll(findFiles(filesAndDirectories[i].getAbsolutePath()));
                 }
                 else {
-                    if (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith("MP3")||
-                        filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith("FLAC"))
+                    if (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".MP3")||
+                        filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".FLAC"))
                         files.add(filesAndDirectories[i]);
                 }
             }

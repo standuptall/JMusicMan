@@ -4,8 +4,6 @@
  */
 package it.albe.JMusicMan;
 
-import com.mpatric.mp3agic.*;
-import it.albe.utils.IO;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
 import java.awt.datatransfer.*;
@@ -16,7 +14,6 @@ import java.awt.event.WindowEvent;
 import java.util.List;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 /**
  
