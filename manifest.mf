@@ -5,6 +5,6 @@ Bundle-Name: JMusicMan
 Bundle-Version: 0.1.2
 Bundle-Date: 2014-06-24 15:55:29
 Implementation-Title: JMusicMan
-Implementation-Version: 0.1.2
+Implementation-Version: build10
 Implementation-URL: http://newbufferedwriter.blogspot.org
 

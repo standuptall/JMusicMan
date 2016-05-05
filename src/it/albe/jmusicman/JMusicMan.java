@@ -222,6 +222,8 @@ public class JMusicMan {
         artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "";
         album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
+        if (artist.equals("")) artist=  "Sconosciuto";
+        if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
         String fileTitle;
         String trackNo = "";
         fileTitle = "";
@@ -231,14 +233,6 @@ public class JMusicMan {
             fileTitle = trackNo+checkFileName(title)+".mp3";
         else if (file.getAbsolutePath().endsWith(".flac"))
             fileTitle = trackNo+checkFileName(title)+".flac";
-        if (fileTitle.equals(""))
-            try {
-                throw new it.albe.JMusicMan.EmptyTagException("Tag vuoti");
-            }
-            catch(it.albe.JMusicMan.EmptyTagException e){
-                IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
-                return;
-            }
         File audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
         if (audioFile.equals(file))
             return;
@@ -378,6 +372,8 @@ public class JMusicMan {
                         album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
                         title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : file.getName();
                         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
+                        if (artist.equals("")) artist=  "Sconosciuto";
+                        if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
                         if (!("".equals(artist)))
                             organize(file);
                     }    
@@ -606,6 +602,9 @@ public class JMusicMan {
             filesAndDirectories = dirFile.listFiles();
             for (int i=0;i<filesAndDirectories.length;i++){
                 if (filesAndDirectories[i].isDirectory()){
+                  //  if (filesAndDirectories[i].listFiles().length==0)
+                  //      filesAndDirectories[i].delete();  //elimino la cartella vuota
+                   // else
                         files.addAll(deleteEmptyDirectories(filesAndDirectories[i].getAbsolutePath()));
                 }
                 else {
