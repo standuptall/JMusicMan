@@ -54,6 +54,11 @@ public class NotEmptyDirectories extends javax.swing.JDialog {
         jScrollPane1.setViewportView(jList1);
 
         jButton1.setText("Elimina");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Apri cartella");
 
@@ -86,6 +91,10 @@ public class NotEmptyDirectories extends javax.swing.JDialog {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments

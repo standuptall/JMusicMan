@@ -234,10 +234,10 @@ public class JMusicMan {
         else if (file.getAbsolutePath().endsWith(".flac"))
             fileTitle = trackNo+checkFileName(title)+".flac";
         File audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album));
-        if (audioFile.equals(file))
-            return;
         audioFile.mkdirs();
         audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
+        if (audioFile.equals(file))
+            return;
         try{
             if (audioFile.createNewFile()){
                 audioFile.delete();
@@ -252,8 +252,8 @@ public class JMusicMan {
              file.delete();
              writer.close();
             }
-            else {
-                
+            else { //vuol dire che in  quella cartella esiste già un file con lo stesso nome
+                throw new EmptyTagException("Tag non univoci");
             }
         }
         catch(IOException e){
@@ -357,10 +357,6 @@ public class JMusicMan {
                 frame.jProgressBar1.setStringPainted(true);
                 int i=0;
                 for (File file :files){
-                    if (i==24)
-                        i=24;
-                    i++;
-                    
                     frame.jProgressBar1.setString(file.getAbsolutePath());
                     progress += step; 
                     progressint = (int)progress;
@@ -387,12 +383,13 @@ public class JMusicMan {
                     skippedFrame.setVisible(true);
                 }
                 frame.jProgressBar1.setString("Pronto");
-                loadLibrary();
                 files = deleteEmptyDirectories(directory);
                 if (!files.isEmpty()){
+                    it.albe.utils.IO("");
                     it.albe.jmusicman.NotEmptyDirectories dialog = new it.albe.jmusicman.NotEmptyDirectories(frame,files);
                     dialog.setVisible(true);
                 }
+                loadLibrary();
                 return null;
                 }
         };
