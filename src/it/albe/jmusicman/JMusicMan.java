@@ -39,6 +39,7 @@ public class JMusicMan {
         frame = new Frame();
         frame.setVisible(true);
         loadLibrary();
+        update();
     }
     /******************************************************************
      * Carica la libreria XML e crea l'albero directory               *
@@ -204,7 +205,10 @@ public class JMusicMan {
      **************************************************************************************/
     
     public static void organize(File file) throws it.albe.JMusicMan.EmptyTagException{
-     
+        int i =0;
+        boolean skippaCopiaFile = false;
+        if (file.getAbsolutePath().contains("Grateful"))
+              i=0  ;
         String title = "";
         String artist = "";
         String album = "";
@@ -237,24 +241,27 @@ public class JMusicMan {
         audioFile.mkdirs();
         audioFile = new File(directory+checkFileName(artist)+"\\"+checkFileName(album)+"\\"+fileTitle);
         if (audioFile.equals(file))
-            return;
+            skippaCopiaFile = true;
         try{
-            if (audioFile.createNewFile()){
-                audioFile.delete();
-                java.io.FileInputStream reader = new FileInputStream(file);
-                FileOutputStream writer = new FileOutputStream(audioFile);
-                byte[] bytes =  new byte[102400];
-                int numbytes;
-                while ((numbytes = reader.read(bytes))>0){
-                    writer.write(bytes,0,numbytes);
+            if (!skippaCopiaFile){
+                if (audioFile.createNewFile()){
+                    audioFile.delete();
+                    java.io.FileInputStream reader = new FileInputStream(file);
+                    FileOutputStream writer = new FileOutputStream(audioFile);
+                    byte[] bytes =  new byte[102400];
+                    int numbytes;
+                    while ((numbytes = reader.read(bytes))>0){
+                        writer.write(bytes,0,numbytes);
+                    }
+                 reader.close();
+                 file.delete();
+                 writer.close();
                 }
-             reader.close();
-             file.delete();
-             writer.close();
+                else { //vuol dire che in  quella cartella esiste già un file con lo stesso nome
+                    throw new EmptyTagException("Tag non univoci");
+                }
             }
-            else { //vuol dire che in  quella cartella esiste già un file con lo stesso nome
-                throw new EmptyTagException("Tag non univoci");
-            }
+                
         }
         catch(IOException e){
             IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
@@ -591,6 +598,8 @@ public class JMusicMan {
      * ritorna le directory che non sono vuote perché hanno file diversi dai file supportati da JMusicMan
      *********************************************************************************************************/
     public static ArrayList<File> deleteEmptyDirectories(String dir){
+        boolean onlyAudio = false;
+        boolean onlyOther = false;
         ArrayList<String> list = new ArrayList<String>();
         File dirFile = new File (dir);
         File[] filesAndDirectories = null;
@@ -599,24 +608,32 @@ public class JMusicMan {
             filesAndDirectories = dirFile.listFiles();
             for (int i=0;i<filesAndDirectories.length;i++){
                 if (filesAndDirectories[i].isDirectory()){
-                  //  if (filesAndDirectories[i].listFiles().length==0)
-                  //      filesAndDirectories[i].delete();  //elimino la cartella vuota
-                   // else
+                    if (filesAndDirectories[i].listFiles().length==0)
+                        filesAndDirectories[i].delete();  //elimino la cartella vuota
+                    else
                         files.addAll(deleteEmptyDirectories(filesAndDirectories[i].getAbsolutePath()));
                 }
                 else {
                     if (!(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".MP3"))&&
                         !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".FLAC"))&&
                         !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".XML"))&&
-                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".INI")))
-                        if (files.size()>0){
-                            if (!files.get(files.size()-1).getAbsolutePath().equals(filesAndDirectories[i].getParentFile().getAbsolutePath()))
-                                files.add(filesAndDirectories[i].getParentFile());
-                        }
-                        else
-                            files.add(filesAndDirectories[i].getParentFile());
+                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".INI"))){
+                        onlyOther = true;   
+                        onlyAudio = false;
+                    }
+                    else {
+                        onlyAudio = true;
+                        onlyOther = false;
+                    }
+                        
                 }
+                             
             }
+            if ((!onlyAudio)&&(onlyOther)){
+                files.add(dirFile);
+                onlyAudio=false;
+                onlyOther=false;
+            }   
         }
         return files;
     }

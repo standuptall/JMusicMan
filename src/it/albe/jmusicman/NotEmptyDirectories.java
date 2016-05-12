@@ -61,6 +61,11 @@ public class NotEmptyDirectories extends javax.swing.JDialog {
         });
 
         jButton2.setText("Apri cartella");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -94,14 +99,21 @@ public class NotEmptyDirectories extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         File f = new File(jList1.getSelectedValue());
+        File[] files = f.listFiles();
         try{
+            for (File file :files)
+                file.delete();
             f.delete();
         }
         catch(Exception e){
-            
+            return;
         }
         IO.print(null, "Cartella eliminata");
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments

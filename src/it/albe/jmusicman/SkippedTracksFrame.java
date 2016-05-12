@@ -5,6 +5,7 @@
  */
 package it.albe.JMusicMan;
 
+import it.albe.utils.IO;
 import java.util.List;
 import java.io.File;
 import org.jaudiotagger.audio.AudioFileIO;
@@ -29,6 +30,7 @@ import org.jaudiotagger.tag.KeyNotFoundException;
 public class SkippedTracksFrame extends javax.swing.JDialog {
     List<File> fileTracks;
     List<Track> tracks;
+    int contatore = 0;
     /**
      * Creates new form SkippedTracksFrame
      */
@@ -38,7 +40,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         initComponents();
         tracks = new ArrayList<>();
         caricaListaTracce();
-        
+        contatore = tracks.size();
     }
 
     /**
@@ -303,6 +305,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         this.jList1.setModel(model);
     }
     private void OKBUtton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBUtton1ActionPerformed
+        
         for (Track track:tracks){
             AudioFile af;
             try{
@@ -315,37 +318,42 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             try {
                 tag.addField(FieldKey.ARTIST, track.getArtist());
             } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                contatore++;
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
                 tag.addField(FieldKey.ALBUM, track.getAlbum());
             } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                contatore++;
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
                 tag.addField(FieldKey.TITLE, track.getName());
             } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                contatore++;
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
                 tag.addField(FieldKey.TRACK, track.getNumber());
             } catch (KeyNotFoundException | FieldDataInvalidException ex) {
+                contatore++;
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
             try {
                 af.setTag(tag);
                 af.commit();
             } catch (CannotWriteException ex) {
+                contatore++;
                 Logger.getLogger(SkippedTracksFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
         this.setVisible(false);
         it.albe.JMusicMan.JMusicMan.update();
         //image already handled in ActionListener, row 66
     }//GEN-LAST:event_OKBUtton1ActionPerformed
 
     private void annullaButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annullaButton1ActionPerformed
+        
         this.setVisible(false);
     }//GEN-LAST:event_annullaButton1ActionPerformed
 
@@ -355,6 +363,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         for(int i:indici){
             Track track = tracks.get(i);
             track.setArtist(artistField1.getText());
+            contatore--;
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
@@ -364,6 +373,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         for(int i:indici){
             Track track = tracks.get(i);
             track.setAlbum(albumField1.getText());
+            contatore--;
         }
         
     }//GEN-LAST:event_jButton2ActionPerformed
@@ -381,7 +391,11 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         if (evt.getKeyChar()<48||evt.getKeyChar()>57)
             trackNumberField1.setText(trackNumberField1.getText().substring(0,trackNumberField1.getText().length()-1));
     }//GEN-LAST:event_trackNumberField1KeyTyped
-
+    public void setVisible(boolean vsbl){
+        if ((contatore>0)&&(!vsbl))
+            IO.print(null, "Attenzione: alcuni file audio non sono stati catalogati.");
+        super.setVisible(vsbl);
+    }
     /**
      * @param args the command line arguments
      */
