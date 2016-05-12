@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.jmusicman;
+package it.albe.JMusicMan;
 
 import it.albe.utils.IO;
 import java.io.File;
@@ -93,7 +93,14 @@ public class NotEmptyDirectories extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        File f = new File(jList1.getSelectedValue());
+        try{
+            f.delete();
+        }
+        catch(Exception e){
+            
+        }
+        IO.print(null, "Cartella eliminata");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**

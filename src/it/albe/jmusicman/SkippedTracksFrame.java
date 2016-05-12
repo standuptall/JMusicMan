@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.jmusicman;
-import it.albe.JMusicMan.JMusicMan;
+package it.albe.JMusicMan;
+
 import java.util.List;
 import java.io.File;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
-import it.albe.JMusicMan.Track;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;

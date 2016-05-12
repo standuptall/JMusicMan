@@ -379,14 +379,14 @@ public class JMusicMan {
                         
                 }
                 if (skippedTracks.size()>0){
-                    it.albe.jmusicman.SkippedTracksFrame skippedFrame = new it.albe.jmusicman.SkippedTracksFrame(frame,skippedTracks);
+                    it.albe.JMusicMan.SkippedTracksFrame skippedFrame = new it.albe.JMusicMan.SkippedTracksFrame(frame,skippedTracks);
                     skippedFrame.setVisible(true);
                 }
                 frame.jProgressBar1.setString("Pronto");
                 files = deleteEmptyDirectories(directory);
                 if (!files.isEmpty()){
-                    it.albe.utils.IO("");
-                    it.albe.jmusicman.NotEmptyDirectories dialog = new it.albe.jmusicman.NotEmptyDirectories(frame,files);
+                    //it.albe.utils.IO("");
+                    it.albe.JMusicMan.NotEmptyDirectories dialog = new it.albe.JMusicMan.NotEmptyDirectories(frame,files);
                     dialog.setVisible(true);
                 }
                 loadLibrary();
