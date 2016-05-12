@@ -201,10 +201,12 @@ public class JMusicMan {
     }
     /***************************************************************************************
      *  crea una directory con il nome dell'artista, una con l'album e ci mette la canzone**
-     *  file: file originale con posizione originale                                       *
+     *  file: file originale con posizione originale     
+     *  ritorna il file stesso se si è verificato un errore, così viene gestito dalla funzione chiamante
+     * 
      **************************************************************************************/
     
-    public static void organize(File file) throws it.albe.JMusicMan.EmptyTagException{
+    public static File organize(File file) throws it.albe.JMusicMan.EmptyTagException{
         int i =0;
         boolean skippaCopiaFile = false;
         if (file.getAbsolutePath().contains("Grateful"))
@@ -218,8 +220,7 @@ public class JMusicMan {
             af = AudioFileIO.read(file);
         }
         catch (Exception e) {
-            System.out.print("file skippato: "+file.getAbsolutePath());
-            return;
+            return file;
         }
         Tag tag = af.getTag();
         title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : "";
@@ -264,7 +265,7 @@ public class JMusicMan {
                 
         }
         catch(IOException e){
-            IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
+            return file;
         }
         
         try{
@@ -276,7 +277,7 @@ public class JMusicMan {
             /*controllo se c'è l'artista */
             while (iterator.hasNext()){
                 Element element = (Element)iterator.next();
-                if (element.getAttributeValue("name").equals(artist)){
+                if (element.getAttributeValue("name").toLowerCase().equals(artist.toLowerCase())){
                     artistElement = element;
                     break;
                 }
@@ -288,7 +289,7 @@ public class JMusicMan {
                 iterator = albums.iterator();
                 while (iterator.hasNext()){
                    Element element = (Element)iterator.next();
-                   if (element.getAttributeValue("name").equals(album))
+                   if (element.getAttributeValue("name").toLowerCase().equals(album.toLowerCase()))
                        albumElement = element;
                 }
                 if (albumElement==null){
@@ -329,8 +330,9 @@ public class JMusicMan {
             xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
         }
         catch(IOException e){
-            IO.err(frame, "Errore nello scrivere i dati sul disco: "+e.toString());
+            return file;
         }
+        return null;
         //loadLibrary();
     }
     /********************************************************************************************************
@@ -377,8 +379,12 @@ public class JMusicMan {
                         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
                         if (artist.equals("")) artist=  "Sconosciuto";
                         if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
-                        if (!("".equals(artist)))
-                            organize(file);
+                        if (!("".equals(artist))){
+                            File filerr = organize(file);
+                            if (filerr!=null)
+                                skippedTracks.add(filerr);
+                        }
+                            
                     }    
                     catch(Exception e){
                         skippedTracks.add(file);
