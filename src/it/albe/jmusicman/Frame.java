@@ -23,6 +23,8 @@ import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
+import org.jaudiotagger.tag.images.ArtworkFactory;
 
 /**
  *
@@ -416,16 +418,21 @@ public class Frame extends javax.swing.JFrame{
                     tag.setField(FieldKey.TITLE,track.getName());
                 if (dialog.artistModified)
                     tag.setField(FieldKey.ARTIST,track.getArtist());
-                if (dialog.imageModified)
-                    ;//audioFile.setAlbumImage(track.getImg(), "image/png");
                 if (dialog.trackModified)
                     tag.setField(FieldKey.TRACK,track.getNumber());
                 if (dialog.commentModified)
                     tag.setField(FieldKey.COMMENT,track.getComment());
+                if (dialog.imageModified){
+                    Artwork art = tag.getFirstArtwork();
+                    if (art==null)
+                        art = ArtworkFactory.getNew();
+                    art.setBinaryData(track.getImg());
+                    tag.addField(art);
+                    tag.addField(art);
+                }
                 
                 audioFile.commit();
-                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
-                newTrack.setComment(track.getComment());
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber(),track.getComment());
                 JMusicMan.organize(new File(newTrack.getPath()));
                 JMusicMan.updateTrack(newTrack, dialog.editResult());
                 File file = new File(track.getPath());
@@ -456,8 +463,7 @@ public class Frame extends javax.swing.JFrame{
                     tag.setField(FieldKey.COMMENT,track.getComment());
                 audioFile.setTag(tag);
                 audioFile.commit();
-                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber());//aggiungo un "mp3" per cambiare path, altrimenti mp3agic dà errore
-                newTrack.setComment(track.getComment());
+                Track newTrack = new Track(track.getArtist(),track.getName(),track.getAlbum(),track.getPath(),track.getNumber(),track.getComment());
                 JMusicMan.organize(new File(newTrack.getPath()));
                 JMusicMan.updateTrack(newTrack, dialog.editResult());
                 File file = new File(track.getPath());

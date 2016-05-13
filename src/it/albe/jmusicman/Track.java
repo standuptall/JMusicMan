@@ -10,13 +10,13 @@ public class Track {
         
         this.comment="";    
     }
-    public Track(String artista, String nome, String album,String path,String n) {
+    public Track(String artista, String nome, String album,String path,String n,String cmt) {
         this.name = nome;
         this.artist = artista;
         this.album = album;
         this.path = path;
         this.track = n;
-        this.comment="";
+        this.comment=cmt;
     }
     public Track(String artista, String nome, String album,String path,byte[] img) {
         this.name = nome;
@@ -83,7 +83,9 @@ public class Track {
         return track;
     }
     public String toString(){
-        return track+" - " + name;
+        if (track!="")
+            return String.format("%2d",Integer.valueOf(track))+" - " + name;
+        else return name;
     }
     public String getPath(){
         return path;

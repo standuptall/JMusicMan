@@ -96,7 +96,9 @@ public class JMusicMan {
                         Element track = (Element)iterator3.next();
                         Album alb = (Album)albumNode.getUserObject();
                         String number = (track.getChild("number")!=null) ? track.getChild("number").getText() : "";
-                        alb.addTrack(new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path"),number));
+                        String comment = (track.getChild("comment")!=null) ? track.getChild("comment").getText() : "";
+                        Track traccia = new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path"),number,comment);        
+                        alb.addTrack(traccia);
                     }
                     
                  }
@@ -131,6 +133,7 @@ public class JMusicMan {
         ArrayList<Track> lista = new ArrayList<Track>();
         String name, artist, album, path;
         String number;
+        String comment;
         int sizel = locale.size();
         int sized = disp.size();
         int c;
@@ -146,7 +149,9 @@ public class JMusicMan {
                 album = locale.get(i).getParentElement().getAttributeValue("name");
                 path = locale.get(i).getChild("path").getText();
                 number = (locale.get(i).getChild("number")!=null) ? locale.get(i).getChild("number").getText() : "";
-                lista.add(new Track(artist,name,album,path,number));
+                comment = (locale.get(i).getChild("comment")!=null) ? locale.get(i).getChild("comment").getText() : "";
+                Track traccia = new Track(artist,name,album,path,number,comment);
+                lista.add(traccia);
             }
         }
         return lista;
@@ -215,6 +220,7 @@ public class JMusicMan {
         String artist = "";
         String album = "";
         String track = "";
+        String comment = "";
         AudioFile af = null;
         try {
             af = AudioFileIO.read(file);
@@ -227,6 +233,8 @@ public class JMusicMan {
         artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "";
         album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
+        comment = (tag.getFirst(FieldKey.COMMENT)!=null) ? tag.getFirst(FieldKey.COMMENT) : "";
+        
         if (artist.equals("")) artist=  "Sconosciuto";
         if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
         String fileTitle;
@@ -314,6 +322,11 @@ public class JMusicMan {
             if (track!=""){
                 element = new Element("number");
                 element.setText(track);
+                trackElement.addContent(element);
+            }
+            if (comment!=""){
+                element = new Element("comment");
+                element.setText(comment);
                 trackElement.addContent(element);
             }
             element = new Element("path");

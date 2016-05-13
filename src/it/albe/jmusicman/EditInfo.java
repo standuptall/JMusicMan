@@ -15,6 +15,7 @@ import java.util.List;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
 /**
  
  * @author Alberto
@@ -65,7 +66,10 @@ public class EditInfo extends javax.swing.JDialog {
             AudioFile audioFile = AudioFileIO.read(new File(track.getPath()));
             Tag tag = audioFile.getTag();
             
-            byte[] img = null;//audioFile.getAlbumImage();
+            Artwork artwork = tag.getFirstArtwork();
+            byte[] img = new byte[0];
+            if (artwork!=null)
+                img = artwork.getBinaryData();
             javax.swing.ImageIcon image = new javax.swing.ImageIcon(img);
             final JLabel label = new JLabel(image);
 
@@ -80,7 +84,7 @@ public class EditInfo extends javax.swing.JDialog {
                         if (contents!=null)
                             if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)){
                                 image = (java.awt.Image)contents.getTransferData(DataFlavor.imageFlavor);
-                                //label.setIcon(new javax.swing.ImageIcon(image));
+                                label.setIcon(new javax.swing.ImageIcon(image));
                                 jScrollPane2.setViewportView(label);
                                 BufferedImage bimage = (BufferedImage)image;
                                 java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream(); 

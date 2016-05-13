@@ -296,7 +296,8 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             String album = (tag.getFirst(FieldKey.ALBUM)!="") ? tag.getFirst(FieldKey.ALBUM) : "";
             String title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
             String track = (tag.getFirst(FieldKey.TRACK)!="") ? tag.getFirst(FieldKey.TRACK) : "";
-            Track traccia = new Track(artist,title,album,file.getAbsolutePath(),track);
+            String comment = (tag.getFirst(FieldKey.COMMENT)!="") ? tag.getFirst(FieldKey.COMMENT) : "";
+            Track traccia = new Track(artist,title,album,file.getAbsolutePath(),track,comment);
             tracks.add(i, traccia);
             model.add(i,file.getAbsolutePath().substring(JMusicMan.directory.length(),
                                                          file.getAbsolutePath().length()-JMusicMan.directory.length()));
