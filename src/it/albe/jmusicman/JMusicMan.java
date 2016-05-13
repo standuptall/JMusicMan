@@ -637,12 +637,10 @@ public class JMusicMan {
                         !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".FLAC"))&&
                         !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".XML"))&&
                         !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".INI"))){
-                        onlyOther = true;   
-                        onlyAudio = false;
+                        onlyOther = true;
                     }
                     else {
                         onlyAudio = true;
-                        onlyOther = false;
                     }
                         
                 }

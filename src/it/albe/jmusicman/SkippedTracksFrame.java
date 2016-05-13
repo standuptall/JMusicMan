@@ -389,8 +389,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
     }//GEN-LAST:event_trackNumberField1KeyReleased
 
     private void trackNumberField1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_trackNumberField1KeyTyped
-        if (evt.getKeyChar()<48||evt.getKeyChar()>57)
-            trackNumberField1.setText(trackNumberField1.getText().substring(0,trackNumberField1.getText().length()-1));
+        
     }//GEN-LAST:event_trackNumberField1KeyTyped
     public void setVisible(boolean vsbl){
         if ((contatore>0)&&(!vsbl))
