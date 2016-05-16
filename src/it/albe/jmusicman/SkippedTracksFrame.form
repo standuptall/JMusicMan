@@ -176,6 +176,9 @@
           </Layout>
           <SubComponents>
             <Component class="javax.swing.JTextField" name="artistField1">
+              <Events>
+                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="artistField1FocusLost"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel6">
               <Properties>
@@ -198,6 +201,9 @@
               </Properties>
             </Component>
             <Component class="javax.swing.JTextField" name="albumField1">
+              <Events>
+                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="albumField1FocusLost"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="jLabel9">
               <Properties>

@@ -83,6 +83,12 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
 
         jSplitPane1.setLeftComponent(jScrollPane1);
 
+        artistField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                artistField1FocusLost(evt);
+            }
+        });
+
         jLabel6.setText("Artista");
 
         jLabel7.setText("Titolo");
@@ -94,6 +100,12 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         });
 
         jLabel8.setText("Album");
+
+        albumField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                albumField1FocusLost(evt);
+            }
+        });
 
         jLabel9.setText("Numero traccia");
 
@@ -297,7 +309,9 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             String title = (tag.getFirst(FieldKey.TITLE)!="") ? tag.getFirst(FieldKey.TITLE) : file.getName();
             String track = (tag.getFirst(FieldKey.TRACK)!="") ? tag.getFirst(FieldKey.TRACK) : "";
             String comment = (tag.getFirst(FieldKey.COMMENT)!="") ? tag.getFirst(FieldKey.COMMENT) : "";
+            String duration = Integer.toString(audioFile.getAudioHeader().getTrackLength());
             Track traccia = new Track(artist,title,album,file.getAbsolutePath(),track,comment);
+            traccia.setDuration(duration);
             tracks.add(i, traccia);
             model.add(i,file.getAbsolutePath().substring(JMusicMan.directory.length(),
                                                          file.getAbsolutePath().length()-JMusicMan.directory.length()));
@@ -391,6 +405,25 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
     private void trackNumberField1KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_trackNumberField1KeyTyped
         
     }//GEN-LAST:event_trackNumberField1KeyTyped
+
+    private void artistField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_artistField1FocusLost
+        int[] indici = jList1.getSelectedIndices();
+        for(int i:indici){
+            Track track = tracks.get(i);
+            track.setArtist(artistField1.getText());
+            contatore--;
+        }
+    }//GEN-LAST:event_artistField1FocusLost
+
+    private void albumField1FocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_albumField1FocusLost
+        //tasto memorizza album
+        int[] indici = jList1.getSelectedIndices();
+        for(int i:indici){
+            Track track = tracks.get(i);
+            track.setAlbum(albumField1.getText());
+            contatore--;
+        }
+    }//GEN-LAST:event_albumField1FocusLost
     public void setVisible(boolean vsbl){
         if ((contatore>0)&&(!vsbl))
             IO.print(null, "Attenzione: alcuni file audio non sono stati catalogati.");

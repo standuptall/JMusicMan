@@ -12,6 +12,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.io.*;
+import javax.swing.JLabel;
 import javax.swing.UIManager;
 import org.jdom.input.*;
 import org.jdom.*;
@@ -77,6 +78,7 @@ public class Frame extends javax.swing.JFrame{
             public void valueChanged(ListSelectionEvent lse) {
                 if (!lse.getValueIsAdjusting()){
                     Track track = (Track)jList1.getSelectedValue();
+                    mostraInfoTraccia(track);
                     try{
                         if (JMusicMan.playerDir!="")
                             Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
@@ -108,6 +110,14 @@ public class Frame extends javax.swing.JFrame{
         jProgressBar1 = new javax.swing.JProgressBar();
         label = new javax.swing.JLabel();
         refreshButton = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jPanel1 = new javax.swing.JPanel();
+        labelArtista = new javax.swing.JLabel();
+        labelAlbum = new javax.swing.JLabel();
+        labelTitolo = new javax.swing.JLabel();
+        labelDuration = new javax.swing.JLabel();
+        labelPath = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         libreriaMenu = new javax.swing.JMenu();
         aggiornaMenuItem = new javax.swing.JMenuItem();
@@ -133,8 +143,8 @@ public class Frame extends javax.swing.JFrame{
         setResizable(false);
 
         jSplitPane1.setDividerLocation(200);
-        jSplitPane1.setMinimumSize(new java.awt.Dimension(500, 250));
-        jSplitPane1.setPreferredSize(new java.awt.Dimension(290, 324));
+        jSplitPane1.setMinimumSize(new java.awt.Dimension(200, 250));
+        jSplitPane1.setPreferredSize(new java.awt.Dimension(2, 324));
 
         jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -166,6 +176,68 @@ public class Frame extends javax.swing.JFrame{
                 refreshButtonActionPerformed(evt);
             }
         });
+
+        labelArtista.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        labelArtista.setText("Iron Maiden");
+
+        labelAlbum.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        labelAlbum.setText("The Number Of The Beast");
+
+        labelTitolo.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        labelTitolo.setText("The Prisoner");
+
+        labelDuration.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        labelDuration.setText("4:52");
+
+        labelPath.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        labelPath.setText("C:\\Users\\Alberto\\Iron Maiden\\The Number Of The Beast\\01-The Prisoner.mp3");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 175, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 178, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(labelAlbum, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
+                        .addComponent(labelArtista, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(labelTitolo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(labelDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(labelPath))
+                .addContainerGap(149, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(labelArtista)
+                .addGap(18, 18, 18)
+                .addComponent(labelAlbum)
+                .addGap(18, 18, 18)
+                .addComponent(labelTitolo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labelDuration)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(labelPath)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(26, Short.MAX_VALUE))
+        );
+
+        jScrollPane3.setViewportView(jPanel1);
 
         libreriaMenu.setText("Libreria");
         libreriaMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -240,23 +312,26 @@ public class Frame extends javax.swing.JFrame{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(refreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 552, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(2, 2, 2)
+                        .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(refreshButton)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -479,7 +554,20 @@ public class Frame extends javax.swing.JFrame{
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         JMusicMan.loadLibrary();
     }//GEN-LAST:event_refreshButtonActionPerformed
-
+    private void mostraInfoTraccia(Track track) {
+        this.labelArtista.setText(track.getArtist());
+        this.labelAlbum.setText(track.getAlbum());
+        this.labelTitolo.setText(track.getName());
+        this.labelDuration.setText(track.getDuration());
+        this.labelPath.setText(track.getPath());
+        
+        if (track.getImg()!=null) {
+            javax.swing.ImageIcon image = new javax.swing.ImageIcon(track.getImg());
+            final JLabel label = new JLabel(image);
+            jScrollPane3.setViewportView(label);
+        }
+            
+    }
     /**
      * @param args the command line arguments
      */
@@ -530,13 +618,21 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenu infoMenu;
     private javax.swing.JList jList1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
     public javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSplitPane jSplitPane1;
     public javax.swing.JTree jTree1;
     public javax.swing.JLabel label;
+    private javax.swing.JLabel labelAlbum;
+    private javax.swing.JLabel labelArtista;
+    private javax.swing.JLabel labelDuration;
+    private javax.swing.JLabel labelPath;
+    private javax.swing.JLabel labelTitolo;
     private javax.swing.JMenu libreriaMenu;
     private javax.swing.JMenuItem modificaPopumMenu;
     private javax.swing.JButton refreshButton;

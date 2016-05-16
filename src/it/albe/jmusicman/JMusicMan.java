@@ -33,6 +33,7 @@ public class JMusicMan {
     public static long lastedit;         //timestamp dell'ultima modifica del file xml
     public static String playerDir; //directory del player
     public static Frame frame;
+    public static boolean primaVolta = false;
     public static void main(String[] args) {
         playerDir = "";
         root = null;
@@ -59,6 +60,7 @@ public class JMusicMan {
                         + "[artista]/[album]/[numero traccia] - [titolo].mp3. Procedere?")>0)
                         System.exit(0);
             else {
+                primaVolta = true;
                 update();
                 return;
             }
@@ -98,6 +100,7 @@ public class JMusicMan {
                         String number = (track.getChild("number")!=null) ? track.getChild("number").getText() : "";
                         String comment = (track.getChild("comment")!=null) ? track.getChild("comment").getText() : "";
                         Track traccia = new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path"),number,comment);        
+                        traccia.setDuration((track.getChild("duration")!=null) ? track.getChild("duration").getText() : "");
                         alb.addTrack(traccia);
                     }
                     
@@ -134,6 +137,7 @@ public class JMusicMan {
         String name, artist, album, path;
         String number;
         String comment;
+        String duration;
         int sizel = locale.size();
         int sized = disp.size();
         int c;
@@ -150,7 +154,9 @@ public class JMusicMan {
                 path = locale.get(i).getChild("path").getText();
                 number = (locale.get(i).getChild("number")!=null) ? locale.get(i).getChild("number").getText() : "";
                 comment = (locale.get(i).getChild("comment")!=null) ? locale.get(i).getChild("comment").getText() : "";
+                duration = (locale.get(i).getChild("duration")!=null) ? locale.get(i).getChild("duration").getText() : "";
                 Track traccia = new Track(artist,name,album,path,number,comment);
+                traccia.setDuration(duration);
                 lista.add(traccia);
             }
         }
@@ -211,7 +217,7 @@ public class JMusicMan {
      * 
      **************************************************************************************/
     
-    public static File organize(File file) throws it.albe.JMusicMan.EmptyTagException{
+    public static File organize(File file) throws it.albe.JMusicMan.ExistingSongException{
         int i =0;
         boolean skippaCopiaFile = false;
         if (file.getAbsolutePath().contains("Grateful"))
@@ -221,6 +227,7 @@ public class JMusicMan {
         String album = "";
         String track = "";
         String comment = "";
+        String duration = "";
         AudioFile af = null;
         try {
             af = AudioFileIO.read(file);
@@ -234,7 +241,8 @@ public class JMusicMan {
         album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
         comment = (tag.getFirst(FieldKey.COMMENT)!=null) ? tag.getFirst(FieldKey.COMMENT) : "";
-        
+        duration = Integer.toString(af.getAudioHeader().getTrackLength());
+                
         if (artist.equals("")) artist=  "Sconosciuto";
         if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
         String fileTitle;
@@ -267,7 +275,7 @@ public class JMusicMan {
                  writer.close();
                 }
                 else { //vuol dire che in  quella cartella esiste già un file con lo stesso nome
-                    throw new EmptyTagException("Tag non univoci");
+                    throw new ExistingSongException("Tag non univoci",af);
                 }
             }
                 
@@ -329,6 +337,11 @@ public class JMusicMan {
                 element.setText(comment);
                 trackElement.addContent(element);
             }
+            if (duration!=""){
+                element = new Element("duration");
+                element.setText(duration);
+                trackElement.addContent(element);
+            }
             element = new Element("path");
             trackElement.addContent(element);
             element.setText(audioFile.getAbsolutePath());
@@ -372,6 +385,7 @@ public class JMusicMan {
                 String album = "";
                 String title = "";
                 String track = "";
+                String duration = "";
                 List<File> files = findFiles(directory);
                 double progress = 0;
                 int progressint = 0;
@@ -390,6 +404,7 @@ public class JMusicMan {
                         album = (tag.getFirst(FieldKey.ALBUM)!=null) ? tag.getFirst(FieldKey.ALBUM) : "";
                         title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : file.getName();
                         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
+                        duration = Integer.toString(audioFile.getAudioHeader().getTrackLength());
                         if (artist.equals("")) artist=  "Sconosciuto";
                         if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
                         if (!("".equals(artist))){
@@ -398,10 +413,38 @@ public class JMusicMan {
                                 skippedTracks.add(filerr);
                         }
                             
+                    }catch(ExistingSongException e){
+                        AudioFile audioFile = e.audioFile; //file che si tenta di scrivere
+                        AudioFile audioFileOld = AudioFileIO.read(file);
+                        if (primaVolta){
+                            skippedTracks.add(file);
+                        } 
+                        else if (audioFileOld.getAudioHeader().getTrackLength()==audioFile.getAudioHeader().getTrackLength()){
+                            int resp = it.albe.utils.IO.confirm(frame, "Il file: \""+file.getAbsolutePath()+"\" contiene tag uguali \ne ha la stessa durata di un file già presente in libreria. "+
+                                                                "Vuoi eliminarlo (Si) o creare una copia rinominata (No)? ");
+                            if (resp==0){
+                                file.delete();
+                            }                               
+                            else {
+                                String name = file.getName();
+                                name = name.substring(0,name.length()-4)+"(1)"+name.substring(name.length()-4,name.length());
+                                File newf = new File(file.getParent()+"\\"+name); 
+                                java.io.FileInputStream reader = new FileInputStream(file);
+                                FileOutputStream writer = new FileOutputStream(newf);
+                                byte[] bytes =  new byte[102400];
+                                int numbytes;
+                                while ((numbytes = reader.read(bytes))>0){
+                                    writer.write(bytes,0,numbytes);
+                                }
+                                reader.close();
+                                file.delete();
+                                writer.close();
+                            }                               
+                        }
                     }    
                     catch(Exception e){
                         skippedTracks.add(file);
-                    }
+                    }                    
                         
                 }
                 if (skippedTracks.size()>0){
@@ -513,6 +556,7 @@ public class JMusicMan {
      **************************************************/
     public static void createEmptyDocument(File file){
         try{
+            primaVolta = true;
             Element root = new Element("JMusicManLibrary");
             root.setAttribute("version","0.1");
             Element element = new Element("lastedit");

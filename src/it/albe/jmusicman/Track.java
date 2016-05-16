@@ -4,7 +4,11 @@ package it.albe.JMusicMan;
 
 public class Track {
     private String name, artist,album,path,track,comment;
-    private int Duration;
+    private String duration;
+
+    public void setDuration(String Duration) {
+        this.duration = Duration;
+    }
     private byte[] img;
     public Track () {
         
@@ -43,8 +47,8 @@ public class Track {
         return this.comment;
     }
 
-    public int getDuration() {
-        return Duration;
+    public String getDuration() {
+        return duration;
     }
 
     public String getAlbum() {
@@ -63,7 +67,7 @@ public class Track {
         this.name="";
         this.artist="";
         this.album="";
-        this.Duration=0;
+        this.duration="";
         this.comment="";
     }
     public void setName(String n) {
