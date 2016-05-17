@@ -47,7 +47,7 @@ public class JMusicMan {
      ******************************************************************/
     public static void loadLibrary(){
         SAXBuilder builder = new SAXBuilder();    
-        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicManLibrary");
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicMan Library");
         treeNode1.removeAllChildren();
         frame.jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         

@@ -6,13 +6,25 @@ package it.albe.JMusicMan;
 
 import static it.albe.JMusicMan.JMusicMan.checkFileName;
 import it.albe.utils.IO;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import static java.awt.Image.SCALE_DEFAULT;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.UIManager;
 import org.jdom.input.*;
 import org.jdom.*;
@@ -22,8 +34,12 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.images.Artwork;
 import org.jaudiotagger.tag.images.ArtworkFactory;
 
@@ -117,7 +133,8 @@ public class Frame extends javax.swing.JFrame{
         labelTitolo = new javax.swing.JLabel();
         labelDuration = new javax.swing.JLabel();
         labelPath = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        textFieldCerca = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         libreriaMenu = new javax.swing.JMenu();
         aggiornaMenuItem = new javax.swing.JMenuItem();
@@ -178,30 +195,25 @@ public class Frame extends javax.swing.JFrame{
         });
 
         labelArtista.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
-        labelArtista.setText("Iron Maiden");
+        labelArtista.setText("Artista");
 
         labelAlbum.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
-        labelAlbum.setText("The Number Of The Beast");
+        labelAlbum.setText("Album");
 
         labelTitolo.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        labelTitolo.setText("The Prisoner");
+        labelTitolo.setText("Nome Traccia");
 
         labelDuration.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        labelDuration.setText("4:52");
+        labelDuration.setText("0:00");
 
         labelPath.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        labelPath.setText("C:\\Users\\Alberto\\Iron Maiden\\The Number Of The Beast\\01-The Prisoner.mp3");
+        labelPath.setText("C:\\PercorsoFile");
 
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 175, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 178, Short.MAX_VALUE)
-        );
+        jScrollPane4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jScrollPane4MouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -210,7 +222,7 @@ public class Frame extends javax.swing.JFrame{
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(labelAlbum, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
                         .addComponent(labelArtista, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -233,11 +245,23 @@ public class Frame extends javax.swing.JFrame{
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labelPath)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(26, Short.MAX_VALUE))
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         jScrollPane3.setViewportView(jPanel1);
+
+        textFieldCerca.setText("Cerca...");
+        textFieldCerca.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                textFieldCercaFocusGained(evt);
+            }
+        });
+        textFieldCerca.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                textFieldCercaKeyTyped(evt);
+            }
+        });
 
         libreriaMenu.setText("Libreria");
         libreriaMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -312,7 +336,7 @@ public class Frame extends javax.swing.JFrame{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
@@ -320,18 +344,23 @@ public class Frame extends javax.swing.JFrame{
                         .addGap(2, 2, 2)
                         .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(textFieldCerca))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(refreshButton)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jScrollPane3))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(textFieldCerca, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -554,18 +583,57 @@ public class Frame extends javax.swing.JFrame{
     private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshButtonActionPerformed
         JMusicMan.loadLibrary();
     }//GEN-LAST:event_refreshButtonActionPerformed
+
+    private void jScrollPane4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jScrollPane4MouseClicked
+        try {
+            //click sull'immagine della cover art
+            Track track = (Track)jList1.getSelectedValue();
+            if (track == null)
+                return;
+            if (track.getImg()==null)
+                return;
+            JFrame imageFrame;
+            imageFrame = new JFrame("cover art");
+            imageFrame.add(new ImagePanel(track));
+            imageFrame.setLocationRelativeTo(null);
+            imageFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            imageFrame.pack();
+            imageFrame.setResizable(false);
+            imageFrame.setVisible(true);
+        } catch (Exception ex) {
+            Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jScrollPane4MouseClicked
+
+    private void textFieldCercaFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_textFieldCercaFocusGained
+        if (textFieldCerca.getText().equals("Cerca..."))
+            textFieldCerca.setText("");
+    }//GEN-LAST:event_textFieldCercaFocusGained
+
+    private void textFieldCercaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldCercaKeyTyped
+        ricerca(textFieldCerca.getText());
+    }//GEN-LAST:event_textFieldCercaKeyTyped
     private void mostraInfoTraccia(Track track) {
+        int minuti = Integer.parseInt(track.getDuration()) / 60; 
+        int secondi = Integer.parseInt(track.getDuration()) - (minuti*60);
         this.labelArtista.setText(track.getArtist());
         this.labelAlbum.setText(track.getAlbum());
         this.labelTitolo.setText(track.getName());
-        this.labelDuration.setText(track.getDuration());
+        this.labelDuration.setText(String.valueOf(minuti)+":"+String.valueOf(secondi));
         this.labelPath.setText(track.getPath());
         
-        if (track.getImg()!=null) {
-            javax.swing.ImageIcon image = new javax.swing.ImageIcon(track.getImg());
-            final JLabel label = new JLabel(image);
-            jScrollPane3.setViewportView(label);
+        if (track.getImg()==null) {
+                recuperaCoverArt(track);
+            if (track.getImg()==null){
+                jScrollPane4.setViewportView(null);
+                return;
+            }
+                
         }
+        javax.swing.ImageIcon image = new javax.swing.ImageIcon(track.getImg());
+        image.setImage(image.getImage().getScaledInstance(jScrollPane4.getWidth(), jScrollPane4.getHeight(), SCALE_DEFAULT));
+        JLabel label = new JLabel(image);
+        jScrollPane4.setViewportView(label);
             
     }
     /**
@@ -619,12 +687,12 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JList jList1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPopupMenu jPopupMenu1;
     public javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JSplitPane jSplitPane1;
     public javax.swing.JTree jTree1;
     public javax.swing.JLabel label;
@@ -639,5 +707,54 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenuItem rilevaDispositivoMenuItem;
     private javax.swing.JMenuItem sincronizzaMenuItem;
     private javax.swing.JMenu sincronizzazioneMenu;
+    private javax.swing.JTextField textFieldCerca;
     // End of variables declaration//GEN-END:variables
+    /*
+     * Metodo che serve a mostra informazioni traccia per visualizzae la cover nel caso non si possa caricare da memoria
+     */
+    private void recuperaCoverArt(Track track) {
+        AudioFile af = null;
+        try {
+            af = AudioFileIO.read(new File(track.getPath()));
+            Tag tag = af.getTag();
+            if (tag.getFirstArtwork()!=null)
+                track.setImg(tag.getFirstArtwork().getBinaryData());
+        } catch (Exception ex) {
+            
+        }        
+    }
+
+    private void ricerca(String text) {
+        List<Track> tracceTrovate = new ArrayList<Track>();
+        TreeModel model = jTree1.getModel();
+        List<Album> albums = new ArrayList<Album>();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
+        for (int i=0;i<root.getSiblingCount();i++){ //scannerizzo artisti
+            DefaultMutableTreeNode artista = root.getNextNode();
+            for (int j=0;j<artista.getSiblingCount();j++)
+                albums.add((Album)artista.getNextNode().getUserObject());
+        }
+        for (int i=0;i<albums.size();i++)
+            for (int j=0;j<albums.get(i).getNumberOfTracks();j++)
+                if (albums.get(i).getTrackAt(j).getName().contains(text)==true)
+                    tracceTrovate.add(albums.get(i).getTrackAt(j));
+        int k=0;
+    }
+}
+
+class ImagePanel extends JPanel {
+    private ImageIcon image;
+    
+    public ImagePanel(Track track) throws Exception {
+        image = new ImageIcon(track.getImg());
+        this.setPreferredSize(new Dimension(image.getIconWidth(),image.getIconHeight()));
+        setMinimumSize(new Dimension(image.getIconWidth(),image.getIconHeight()));
+    }
+    @Override
+    public void paintComponent(Graphics g) {
+        //super.paint(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.drawImage(image.getImage(), 0, 0, image.getIconWidth(), image.getIconHeight(), null);
+        g2d.dispose();
+    }
 }
