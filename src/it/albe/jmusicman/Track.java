@@ -88,7 +88,7 @@ public class Track {
     }
     public String toString(){
         if (track!="")
-            return String.format("%2d",Integer.valueOf(track))+" - " + name;
+            return String.format("%02d",Integer.valueOf(track))+" - " + name;
         else return name;
     }
     public String getPath(){

@@ -102,6 +102,9 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
         jLabel8.setText("Album");
 
         albumField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                albumField1FocusGained(evt);
+            }
             public void focusLost(java.awt.event.FocusEvent evt) {
                 albumField1FocusLost(evt);
             }
@@ -282,8 +285,8 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
                 albumField1.setText(track.getAlbum());
                 artistField1.setText(track.getArtist());
                 titleField1.setText(track.getName());
-                commentField1.setText("");
-                trackNumberField1.setText("");
+                commentField1.setText(track.getComment());
+                trackNumberField1.setText(track.getNumber());
                 titleField1.setEnabled(true);
                 commentField1.setEnabled(true);
                 trackNumberField1.setEnabled(true);
@@ -424,6 +427,10 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             contatore--;
         }
     }//GEN-LAST:event_albumField1FocusLost
+
+    private void albumField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_albumField1FocusGained
+        albumField1.selectAll();
+    }//GEN-LAST:event_albumField1FocusGained
     public void setVisible(boolean vsbl){
         if ((contatore>0)&&(!vsbl))
             IO.print(null, "Attenzione: alcuni file audio non sono stati catalogati.");

@@ -12,11 +12,17 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.*;
 import javax.swing.tree.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jdom.filter.ElementFilter;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
 
 /**
  *
@@ -35,11 +41,20 @@ public class JMusicMan {
     public static Frame frame;
     public static boolean primaVolta = false;
     public static void main(String[] args) {
+        PrintStream out = null;        
         playerDir = "";
         root = null;
         frame = new Frame();
         frame.setVisible(true);
-        loadLibrary();
+        loadLibrary();        
+        Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
+        try {
+            out = new PrintStream(new FileOutputStream(directory+"error.log"));        
+            System.setErr(out);
+        } 
+        catch (FileNotFoundException ex) {
+            Logger.getLogger(JMusicMan.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         update();
     }
     /******************************************************************
@@ -217,11 +232,9 @@ public class JMusicMan {
      * 
      **************************************************************************************/
     
-    public static File organize(File file) throws it.albe.JMusicMan.ExistingSongException{
+    public static File organize(File file) throws it.albe.JMusicMan.ExistingSongException, CannotReadException, TagException, ReadOnlyFileException, InvalidAudioFrameException{
         int i =0;
         boolean skippaCopiaFile = false;
-        if (file.getAbsolutePath().contains("Grateful"))
-              i=0  ;
         String title = "";
         String artist = "";
         String album = "";
@@ -242,7 +255,15 @@ public class JMusicMan {
         track = (tag.getFirst(FieldKey.TRACK)!=null) ? tag.getFirst(FieldKey.TRACK) : "";
         comment = (tag.getFirst(FieldKey.COMMENT)!=null) ? tag.getFirst(FieldKey.COMMENT) : "";
         duration = Integer.toString(af.getAudioHeader().getTrackLength());
-                
+        try{
+            int trackint = Integer.parseInt(track);
+            track = String.format("%02d", trackint);
+        }
+        catch(Exception e){
+            
+        }
+   
+        
         if (artist.equals("")) artist=  "Sconosciuto";
         if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
         String fileTitle;
@@ -275,7 +296,8 @@ public class JMusicMan {
                  writer.close();
                 }
                 else { //vuol dire che in  quella cartella esiste già un file con lo stesso nome
-                    throw new ExistingSongException("Tag non univoci",af);
+                    AudioFile audioOld = AudioFileIO.read(audioFile);
+                    throw new ExistingSongException("Tag non univoci",audioOld);
                 }
             }
                 
@@ -413,14 +435,17 @@ public class JMusicMan {
                                 skippedTracks.add(filerr);
                         }
                             
-                    }catch(ExistingSongException e){
+                    }
+                    catch(ExistingSongException e){
                         AudioFile audioFile = e.audioFile; //file che si tenta di scrivere
-                        AudioFile audioFileOld = AudioFileIO.read(file);
+                        AudioFile audioFileOld = AudioFileIO.read(file);  //file da spostare/rinominare
                         if (primaVolta){
                             skippedTracks.add(file);
                         } 
                         else if (audioFileOld.getAudioHeader().getTrackLength()==audioFile.getAudioHeader().getTrackLength()){
-                            int resp = it.albe.utils.IO.confirm(frame, "Il file: \""+file.getAbsolutePath()+"\" contiene tag uguali \ne ha la stessa durata di un file già presente in libreria. "+
+                            int resp = it.albe.utils.IO.confirm(frame, "Il file: \""+file.getAbsolutePath()+"\" contiene tag uguali \ne ha la stessa durata di un file già presente in libreria. \n"+
+                                                                "Artista: " + artist + "\n" +
+                                                                "Album: " + album + "\n" +
                                                                 "Vuoi eliminarlo (Si) o creare una copia rinominata (No)? ");
                             if (resp==0){
                                 file.delete();
@@ -428,7 +453,7 @@ public class JMusicMan {
                             else {
                                 String name = file.getName();
                                 name = name.substring(0,name.length()-4)+"(1)"+name.substring(name.length()-4,name.length());
-                                File newf = new File(file.getParent()+"\\"+name); 
+                                File newf = new File(audioFile.getFile().getParent()+"\\"+name); 
                                 java.io.FileInputStream reader = new FileInputStream(file);
                                 FileOutputStream writer = new FileOutputStream(newf);
                                 byte[] bytes =  new byte[102400];
@@ -440,12 +465,13 @@ public class JMusicMan {
                                 file.delete();
                                 writer.close();
                             }                               
+                        } else { //la durata dei file è diversa e il tag DEVE essere modificato
+                            skippedTracks.add(file);
                         }
                     }    
                     catch(Exception e){
                         skippedTracks.add(file);
-                    }                    
-                        
+                    }                                            
                 }
                 if (skippedTracks.size()>0){
                     it.albe.JMusicMan.SkippedTracksFrame skippedFrame = new it.albe.JMusicMan.SkippedTracksFrame(frame,skippedTracks);

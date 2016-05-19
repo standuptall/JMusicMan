@@ -12,6 +12,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import static java.awt.Image.SCALE_DEFAULT;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.swing.event.ListSelectionEvent;
@@ -21,11 +23,18 @@ import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
 import org.jdom.input.*;
 import org.jdom.*;
 import org.jdom.Element;
@@ -62,6 +71,7 @@ public class Frame extends javax.swing.JFrame{
         
         }
         initComponents();
+        numerazione = 0;
         this.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width)/2 - this.getWidth()/2, (Toolkit.getDefaultToolkit().getScreenSize().height)/2 - this.getHeight()/2);
         
         jTree1.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -96,11 +106,31 @@ public class Frame extends javax.swing.JFrame{
                     Track track = (Track)jList1.getSelectedValue();
                     mostraInfoTraccia(track);
                     try{
-                        if (JMusicMan.playerDir!="")
-                            Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
+                        try{
+                            if (JMusicMan.playerDir!="")
+                                Runtime.getRuntime().exec(JMusicMan.playerDir + " \"" + track.getPath() + "\"");
+                        }
+                        catch(Exception e){
+                            IO.err(null, "Errore nell'eseguire il player:"+e.toString());
+                        }
+                            
+                        if ((numerazione>0)&&(numerazione<=numerazioneStart+numerazione)){
+                            track.setTrack(String.format("%02d", numerazione));
+                            AudioFile af = AudioFileIO.read(new File(track.getPath()));
+                            af.getTag().setField(FieldKey.TRACK, track.getNumber());
+                            af.commit();
+                            numerazione++;
+                            jList1.updateUI();
+                        }
+                        if ((numerazione-numerazioneStart+1)>jList1.getModel().getSize()){
+                            numerazione = 0;
+                            jTree1.setEnabled(true);
+                            textFieldCerca.setEnabled(true);
+                            iniziaNumerazioneMenuItem.setEnabled(true);
+                        }
                     }
                     catch(Exception e){
-                        IO.err(null, "Errore nell'eseguire il player:"+e.toString());
+                        IO.err(null, "Si è verificato un errore:"+e.toString());
                     }
                 }
             }
@@ -141,6 +171,7 @@ public class Frame extends javax.swing.JFrame{
         aggiungiMenuItem = new javax.swing.JMenuItem();
         impostaPlayerMenuItem = new javax.swing.JMenuItem();
         impostaCartellaMenuItem = new javax.swing.JMenuItem();
+        iniziaNumerazioneMenuItem = new javax.swing.JMenuItem();
         sincronizzazioneMenu = new javax.swing.JMenu();
         rilevaDispositivoMenuItem = new javax.swing.JMenuItem();
         sincronizzaMenuItem = new javax.swing.JMenuItem();
@@ -257,6 +288,11 @@ public class Frame extends javax.swing.JFrame{
                 textFieldCercaFocusGained(evt);
             }
         });
+        textFieldCerca.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                textFieldCercaPropertyChange(evt);
+            }
+        });
         textFieldCerca.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 textFieldCercaKeyTyped(evt);
@@ -291,6 +327,15 @@ public class Frame extends javax.swing.JFrame{
 
         impostaCartellaMenuItem.setText("Imposta cartella");
         libreriaMenu.add(impostaCartellaMenuItem);
+
+        iniziaNumerazioneMenuItem.setText("Inizia numerazione");
+        iniziaNumerazioneMenuItem.setToolTipText("");
+        iniziaNumerazioneMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                iniziaNumerazioneMenuItemActionPerformed(evt);
+            }
+        });
+        libreriaMenu.add(iniziaNumerazioneMenuItem);
 
         jMenuBar1.add(libreriaMenu);
 
@@ -611,8 +656,56 @@ public class Frame extends javax.swing.JFrame{
     }//GEN-LAST:event_textFieldCercaFocusGained
 
     private void textFieldCercaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_textFieldCercaKeyTyped
+        
         ricerca(textFieldCerca.getText());
     }//GEN-LAST:event_textFieldCercaKeyTyped
+
+    private void iniziaNumerazioneMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_iniziaNumerazioneMenuItemActionPerformed
+        if (jList1.getModel().getSize()==0){
+            IO.print(this, "Per usare questa funzione è necessario selezionare un album!");
+            return;
+        }
+        // creo finestra di dialogo --->
+        JDialog dialog = new JDialog(this);
+        JPanel listPane = new JPanel();
+        dialog.add(listPane);
+        listPane.setLayout(new BoxLayout(listPane, BoxLayout.PAGE_AXIS));
+        listPane.add(new JLabel("Inizia dal numero: "));
+        JSpinner spinner = new JSpinner();
+        spinner.getModel().setValue(1);
+        spinner.getModel().addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+              if ((((int)((SpinnerNumberModel)e.getSource()).getValue())>jList1.getModel().getSize())||
+                    (((int)((SpinnerNumberModel)e.getSource()).getValue())<1)  )
+                  ((SpinnerNumberModel)e.getSource()).setValue(((SpinnerNumberModel)e.getSource()).getPreviousValue());
+            }
+          });
+        spinner.setMinimumSize(new Dimension(200,30));
+        listPane.add(spinner);
+        JButton button = new JButton("OK");
+        button.setMinimumSize(new Dimension(200,20));
+        button.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                dialog.setVisible(false);
+                numerazione = (int)spinner.getValue();
+                numerazioneStart = numerazione;
+            }
+        });
+        listPane.add(button);        
+        dialog.pack();
+        dialog.setLocation(java.awt.MouseInfo.getPointerInfo().getLocation());
+        dialog.setSize(new Dimension(200,100));
+        dialog.setVisible(true);
+        
+        //<--- creo finestra di dialogo
+        jTree1.setEnabled(false);
+        textFieldCerca.setEnabled(false);
+        iniziaNumerazioneMenuItem.setEnabled(false);
+    }//GEN-LAST:event_iniziaNumerazioneMenuItemActionPerformed
+
+    private void textFieldCercaPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_textFieldCercaPropertyChange
+        
+    }//GEN-LAST:event_textFieldCercaPropertyChange
     private void mostraInfoTraccia(Track track) {
         int minuti = Integer.parseInt(track.getDuration()) / 60; 
         int secondi = Integer.parseInt(track.getDuration()) - (minuti*60);
@@ -636,47 +729,7 @@ public class Frame extends javax.swing.JFrame{
         jScrollPane4.setViewportView(label);
             
     }
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Frame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Frame().setVisible(true);
-            }
-        });
-        /*
-        it.albe.FlacReader.FlacReader flacreader = new it.albe.FlacReader.FlacReader("C:\\Alberto\\recit16bit.flac");
-        flacreader.addComment("artist", "Adriano Celentano");
-        flacreader.addComment("album", "24000 baci");
-        flacreader.addComment("title", "una carezza in un pugno");
-        flacreader.addComment("track", "6");
-        flacreader.writeAll();*/
-    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutItem;
     private javax.swing.JMenuItem aggiornaMenuItem;
@@ -684,6 +737,7 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenuItem impostaCartellaMenuItem;
     private javax.swing.JMenuItem impostaPlayerMenuItem;
     private javax.swing.JMenu infoMenu;
+    private javax.swing.JMenuItem iniziaNumerazioneMenuItem;
     private javax.swing.JList jList1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
@@ -709,6 +763,8 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenu sincronizzazioneMenu;
     private javax.swing.JTextField textFieldCerca;
     // End of variables declaration//GEN-END:variables
+    private int numerazione; //se è maggiore di zero vuol dire che sta assegnando il numero della traccia 
+    private int numerazioneStart; //mantiene il valore originario er il controllo del contatore
     /*
      * Metodo che serve a mostra informazioni traccia per visualizzae la cover nel caso non si possa caricare da memoria
      */
@@ -720,7 +776,6 @@ public class Frame extends javax.swing.JFrame{
             if (tag.getFirstArtwork()!=null)
                 track.setImg(tag.getFirstArtwork().getBinaryData());
         } catch (Exception ex) {
-            
         }        
     }
 
@@ -728,17 +783,29 @@ public class Frame extends javax.swing.JFrame{
         List<Track> tracceTrovate = new ArrayList<Track>();
         TreeModel model = jTree1.getModel();
         List<Album> albums = new ArrayList<Album>();
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
-        for (int i=0;i<root.getSiblingCount();i++){ //scannerizzo artisti
-            DefaultMutableTreeNode artista = root.getNextNode();
-            for (int j=0;j<artista.getSiblingCount();j++)
-                albums.add((Album)artista.getNextNode().getUserObject());
+        if (!"".equals(text)){
+            DefaultMutableTreeNode root = (DefaultMutableTreeNode)model.getRoot();
+            DefaultMutableTreeNode artista;
+            DefaultMutableTreeNode album;
+            for (Enumeration<DefaultMutableTreeNode> e = root.children(); e.hasMoreElements();){
+                artista = e.nextElement();
+                for (Enumeration<DefaultMutableTreeNode> e1 = artista.children(); e1.hasMoreElements();){
+                    album = e1.nextElement();
+                    albums.add((Album)album.getUserObject());
+                }
+            }
+            for (int i=0;i<albums.size();i++)
+                for (int j=0;j<albums.get(i).getNumberOfTracks();j++)
+                    if (albums.get(i).getTrackAt(j).getName().toUpperCase().contains(text.toUpperCase())==true)
+                        tracceTrovate.add(albums.get(i).getTrackAt(j));
         }
-        for (int i=0;i<albums.size();i++)
-            for (int j=0;j<albums.get(i).getNumberOfTracks();j++)
-                if (albums.get(i).getTrackAt(j).getName().contains(text)==true)
-                    tracceTrovate.add(albums.get(i).getTrackAt(j));
-        int k=0;
+        javax.swing.DefaultListModel modello = new javax.swing.DefaultListModel();
+        for (int i=0;i<tracceTrovate.size();i++){
+            modello.addElement(tracceTrovate.get(i));
+        }
+        if (tracceTrovate.size()==0)
+            modello.addElement(new Track("", "Nessun risultato", "",""));
+        jList1.setModel(modello);                
     }
 }
 
