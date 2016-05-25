@@ -54,15 +54,6 @@
                 <Property name="text" type="java.lang.String" value="Imposta cartella"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="iniziaNumerazioneMenuItem">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Inizia numerazione"/>
-                <Property name="toolTipText" type="java.lang.String" value=""/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="iniziaNumerazioneMenuItemActionPerformed"/>
-              </Events>
-            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="sincronizzazioneMenu">
@@ -84,6 +75,39 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="sincronizzaMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="jMenu1">
+          <Properties>
+            <Property name="label" type="java.lang.String" value="Automatismi"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="iniziaNumerazioneMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Inizia numerazione"/>
+                <Property name="toolTipText" type="java.lang.String" value=""/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="iniziaNumerazioneMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="modificaMassiva">
+              <Properties>
+                <Property name="label" type="java.lang.String" value="Modifica titoli massivamente"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="modificaMassivaActionPerformed"/>
+              </Events>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="riconosciTracciaMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Riconosci traccia selezionata"/>
+              </Properties>
+              <Events>
+                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="riconosciTracciaMenuItemMouseClicked"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="riconosciTracciaMenuItemActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>

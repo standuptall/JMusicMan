@@ -4,25 +4,26 @@
  */
 package it.albe.JMusicMan;
 
-import static it.albe.JMusicMan.JMusicMan.checkFileName;
+import static it.albe.JMusicMan.JMusicMan.document;
 import it.albe.utils.IO;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import static java.awt.Image.SCALE_DEFAULT;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -31,11 +32,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
-import org.jdom.input.*;
 import org.jdom.*;
 import org.jdom.Element;
 import org.jdom.filter.ElementFilter;
@@ -43,14 +42,13 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.audio.exceptions.CannotReadException;
-import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
-import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagException;
 import org.jaudiotagger.tag.images.Artwork;
 import org.jaudiotagger.tag.images.ArtworkFactory;
+import org.jdom.*;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.*;
 
 /**
  *
@@ -171,10 +169,13 @@ public class Frame extends javax.swing.JFrame{
         aggiungiMenuItem = new javax.swing.JMenuItem();
         impostaPlayerMenuItem = new javax.swing.JMenuItem();
         impostaCartellaMenuItem = new javax.swing.JMenuItem();
-        iniziaNumerazioneMenuItem = new javax.swing.JMenuItem();
         sincronizzazioneMenu = new javax.swing.JMenu();
         rilevaDispositivoMenuItem = new javax.swing.JMenuItem();
         sincronizzaMenuItem = new javax.swing.JMenuItem();
+        jMenu1 = new javax.swing.JMenu();
+        iniziaNumerazioneMenuItem = new javax.swing.JMenuItem();
+        modificaMassiva = new javax.swing.JMenuItem();
+        riconosciTracciaMenuItem = new javax.swing.JMenuItem();
         infoMenu = new javax.swing.JMenu();
         aboutItem = new javax.swing.JMenuItem();
 
@@ -328,15 +329,6 @@ public class Frame extends javax.swing.JFrame{
         impostaCartellaMenuItem.setText("Imposta cartella");
         libreriaMenu.add(impostaCartellaMenuItem);
 
-        iniziaNumerazioneMenuItem.setText("Inizia numerazione");
-        iniziaNumerazioneMenuItem.setToolTipText("");
-        iniziaNumerazioneMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                iniziaNumerazioneMenuItemActionPerformed(evt);
-            }
-        });
-        libreriaMenu.add(iniziaNumerazioneMenuItem);
-
         jMenuBar1.add(libreriaMenu);
 
         sincronizzazioneMenu.setText("Sincronizzazione");
@@ -358,6 +350,40 @@ public class Frame extends javax.swing.JFrame{
         sincronizzazioneMenu.add(sincronizzaMenuItem);
 
         jMenuBar1.add(sincronizzazioneMenu);
+
+        jMenu1.setLabel("Automatismi");
+
+        iniziaNumerazioneMenuItem.setText("Inizia numerazione");
+        iniziaNumerazioneMenuItem.setToolTipText("");
+        iniziaNumerazioneMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                iniziaNumerazioneMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(iniziaNumerazioneMenuItem);
+
+        modificaMassiva.setLabel("Modifica titoli massivamente");
+        modificaMassiva.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                modificaMassivaActionPerformed(evt);
+            }
+        });
+        jMenu1.add(modificaMassiva);
+
+        riconosciTracciaMenuItem.setText("Riconosci traccia selezionata");
+        riconosciTracciaMenuItem.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                riconosciTracciaMenuItemMouseClicked(evt);
+            }
+        });
+        riconosciTracciaMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                riconosciTracciaMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(riconosciTracciaMenuItem);
+
+        jMenuBar1.add(jMenu1);
 
         infoMenu.setText("Info");
 
@@ -706,6 +732,80 @@ public class Frame extends javax.swing.JFrame{
     private void textFieldCercaPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_textFieldCercaPropertyChange
         
     }//GEN-LAST:event_textFieldCercaPropertyChange
+
+    private void modificaMassivaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modificaMassivaActionPerformed
+        if (jList1.getModel().getSize()==0){
+            IO.print(this, "Per usare questa funzione è necessario selezionare un album!");
+            return;
+        }
+        it.albe.jmusicman.ModificaMassiva dialog = new it.albe.jmusicman.ModificaMassiva(this,true);
+        dialog.setVisible(true);
+    }//GEN-LAST:event_modificaMassivaActionPerformed
+
+    private void riconosciTracciaMenuItemMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_riconosciTracciaMenuItemMouseClicked
+        
+        
+        
+    }//GEN-LAST:event_riconosciTracciaMenuItemMouseClicked
+
+    private void riconosciTracciaMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_riconosciTracciaMenuItemActionPerformed
+        if (jList1.getModel().getSize()==0){
+            IO.print(this, "Per usare questa funzione è necessario selezionare un album!");
+            return;
+        }
+        if (jList1.getSelectedIndices().length==0){
+            IO.print(this, "Selezionare una traccia!");
+            return;
+        }
+        if (jList1.getSelectedIndices().length>1){
+            IO.print(this, "Selezionare solo una traccia!");
+            return;
+        }
+
+        String artista = null;
+        int durata = 0;
+        String album = null;
+        try {
+            artista = URLEncoder.encode(((Track) jList1.getModel().getElementAt(jList1.getSelectedIndex())).getArtist(), "UTF-8");
+            durata = Integer.parseInt(((Track) jList1.getModel().getElementAt(jList1.getSelectedIndex())).getDuration()) * 1000;
+            album = URLEncoder.encode(((Track) jList1.getModel().getElementAt(jList1.getSelectedIndex())).getArtist(), "UTF-8");
+        } catch (UnsupportedEncodingException unsupportedEncodingException) {
+        } 
+        String query = "artist:%22"+artista+"%22%20AND%20dur:"+durata;
+        URL url = null;
+        try {
+            url = new URL("http://musicbrainz.org/ws/2/recording/?query="+query);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        try {
+            URLConnection con = url.openConnection();
+            InputStream in = con.getInputStream();
+            String encoding = con.getContentEncoding();
+            encoding = encoding == null ? "UTF-8" : encoding;
+            SAXBuilder builder = new SAXBuilder(); 
+            Document document;
+            document = builder.build(in);
+            Element root = document.getRootElement();
+            Element recordingList = (Element)root.getChildren().get(0);
+            List<Track> tracce = new ArrayList<Track>();
+            int count = recordingList.getAttribute("count").getIntValue();
+            List<Element> lista = recordingList.getChildren();
+            Namespace ns = Namespace.getNamespace("http://musicbrainz.org/ns/mmd-2.0#");
+            /* TODO: prevedere di aggiungere anche diversi tipi di album per una stessa traccia */
+            for (Element elem : lista){
+               String artist = elem.getChild("artist-credit",ns).getChild("name-credit",ns).getChild("artist",ns).getChildText("name",ns);
+               String albume  = elem.getChild("release-list",ns).getChild("release",ns).getChildText("title",ns);
+               String title = elem.getChildText("title",ns);
+               tracce.add(new Track(artist,title,album,""));  
+            }
+                 int c =0;
+        } catch (IOException iOException) {
+        } catch (JDOMException ex) {
+            Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_riconosciTracciaMenuItemActionPerformed
     private void mostraInfoTraccia(Track track) {
         int minuti = Integer.parseInt(track.getDuration()) / 60; 
         int secondi = Integer.parseInt(track.getDuration()) - (minuti*60);
@@ -739,6 +839,7 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenu infoMenu;
     private javax.swing.JMenuItem iniziaNumerazioneMenuItem;
     private javax.swing.JList jList1;
+    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPopupMenu jPopupMenu1;
@@ -756,8 +857,10 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JLabel labelPath;
     private javax.swing.JLabel labelTitolo;
     private javax.swing.JMenu libreriaMenu;
+    private javax.swing.JMenuItem modificaMassiva;
     private javax.swing.JMenuItem modificaPopumMenu;
     private javax.swing.JButton refreshButton;
+    private javax.swing.JMenuItem riconosciTracciaMenuItem;
     private javax.swing.JMenuItem rilevaDispositivoMenuItem;
     private javax.swing.JMenuItem sincronizzaMenuItem;
     private javax.swing.JMenu sincronizzazioneMenu;
