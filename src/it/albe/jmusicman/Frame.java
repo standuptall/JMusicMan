@@ -761,7 +761,8 @@ public class Frame extends javax.swing.JFrame{
             IO.print(this, "Selezionare solo una traccia!");
             return;
         }
-
+        it.albe.jmusicman.RiconoscimentoDialog dialog = new it.albe.jmusicman.RiconoscimentoDialog(this,false);
+        dialog.setVisible(true);
         String artista = null;
         int durata = 0;
         String album = null;
@@ -800,7 +801,7 @@ public class Frame extends javax.swing.JFrame{
                String title = elem.getChildText("title",ns);
                tracce.add(new Track(artist,title,album,""));  
             }
-                 int c =0;
+            dialog.setTrackList(tracce);
         } catch (IOException iOException) {
         } catch (JDOMException ex) {
             Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
