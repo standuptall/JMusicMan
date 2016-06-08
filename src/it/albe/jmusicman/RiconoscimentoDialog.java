@@ -24,11 +24,13 @@ public class RiconoscimentoDialog extends javax.swing.JDialog {
     /**
      * Creates new form RiconoscimentoDialog
      */
-    List<Track> tracce = null;
-    public RiconoscimentoDialog(java.awt.Frame parent, boolean modal) {
+    public List<Track> tracce = null;
+    boolean daAlbum = false;
+    public RiconoscimentoDialog(java.awt.Frame parent, boolean modal, boolean daAlbum) {
         
         super(parent, modal);
         initComponents();
+        this.daAlbum = daAlbum;
         /*
         JPanel panel = new JPanel(false);
         panel.setLayout(new FlowLayout());
@@ -190,9 +192,15 @@ public class RiconoscimentoDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_trackNumberFieldKeyReleased
 
     private void OKBUttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OKBUttonActionPerformed
-        
-
-        //image already handled in ActionListener, row 66
+        if (daAlbum){
+            it.albe.utils.IO.print(null,"Le tracce verranno modificate provando a cercare il numero della traccia nel titolo vecchio.");
+            if (tracce!=null){
+                this.setVisible(false);
+            }
+        }
+        else {
+            
+        }
     }//GEN-LAST:event_OKBUttonActionPerformed
 
     private void annullaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_annullaButtonActionPerformed

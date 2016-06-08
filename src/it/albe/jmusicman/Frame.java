@@ -176,6 +176,7 @@ public class Frame extends javax.swing.JFrame{
         iniziaNumerazioneMenuItem = new javax.swing.JMenuItem();
         modificaMassiva = new javax.swing.JMenuItem();
         riconosciTracciaMenuItem = new javax.swing.JMenuItem();
+        compilaTitoliMenuItem = new javax.swing.JMenuItem();
         infoMenu = new javax.swing.JMenu();
         aboutItem = new javax.swing.JMenuItem();
 
@@ -382,6 +383,14 @@ public class Frame extends javax.swing.JFrame{
             }
         });
         jMenu1.add(riconosciTracciaMenuItem);
+
+        compilaTitoliMenuItem.setText("Compila titoli album automaticamente");
+        compilaTitoliMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                compilaTitoliMenuItemActionPerformed(evt);
+            }
+        });
+        jMenu1.add(compilaTitoliMenuItem);
 
         jMenuBar1.add(jMenu1);
 
@@ -761,7 +770,7 @@ public class Frame extends javax.swing.JFrame{
             IO.print(this, "Selezionare solo una traccia!");
             return;
         }
-        it.albe.jmusicman.RiconoscimentoDialog dialog = new it.albe.jmusicman.RiconoscimentoDialog(this,false);
+        it.albe.jmusicman.RiconoscimentoDialog dialog = new it.albe.jmusicman.RiconoscimentoDialog(this,false,false);
         dialog.setVisible(true);
         String artista = null;
         int durata = 0;
@@ -807,6 +816,79 @@ public class Frame extends javax.swing.JFrame{
             Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_riconosciTracciaMenuItemActionPerformed
+
+    private void compilaTitoliMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_compilaTitoliMenuItemActionPerformed
+        if (jList1.getModel().getSize()==0){
+            IO.print(this, "Per usare questa funzione è necessario selezionare un album!");
+            return;
+        }
+        it.albe.jmusicman.RiconoscimentoDialog dialog = new it.albe.jmusicman.RiconoscimentoDialog(this,true,true);
+        String artista = null;
+        String albume = null;
+        String album = ((Track) jList1.getModel().getElementAt(0)).getAlbum();
+        try {
+            artista = URLEncoder.encode(((Track) jList1.getModel().getElementAt(0)).getArtist(), "UTF-8");
+            albume = URLEncoder.encode(album, "UTF-8");
+        } catch (UnsupportedEncodingException unsupportedEncodingException) {
+        } 
+        String query = "artist:%22"+artista+"%22%20AND%20release:%22"+albume+"%22";
+        URL url = null;
+        try {
+            url = new URL("http://musicbrainz.org/ws/2/recording/?query="+query);
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+        try {
+            /*
+            URLConnection con = url.openConnection();
+            InputStream in = con.getInputStream();
+            
+            String encoding = con.getContentEncoding();
+            
+            encoding = encoding == null ? "UTF-8" : encoding;
+            */
+            SAXBuilder builder = new SAXBuilder(); 
+            Document document;
+            //document = builder.build(in);
+            document = builder.build(new java.io.FileInputStream("C:\\Users\\Alberto\\Desktop\\download.xml"));
+            Element root = document.getRootElement();
+            Element recordingList = (Element)root.getChildren().get(0);
+            List<Track> tracce = new ArrayList<Track>();
+            int count = recordingList.getAttribute("count").getIntValue();
+            List<Element> lista = recordingList.getChildren();
+            Namespace ns = Namespace.getNamespace("http://musicbrainz.org/ns/mmd-2.0#");
+            /* TODO: prevedere di aggiungere anche diversi tipi di album per una stessa traccia */
+            for (Element elem : lista){
+               String title = "";
+               String track = "";
+               List<Element> listaAlbum = elem.getChild("release-list",ns).getChildren();
+               for (Element eleme : listaAlbum){
+                   if (eleme.getChildText("title",ns).equals(album)){
+                       track = eleme.getChild("medium-list",ns).getChild("medium",ns).getChild("track-list",ns).getChild("track",ns).getChildText("number",ns);
+                       title = eleme.getChild("medium-list",ns).getChild("medium",ns).getChild("track-list",ns).getChild("track",ns).getChildText("title",ns);
+                   }
+               }
+               tracce.add(new Track(artista,title,album,track));  
+            }
+            dialog.setTrackList(tracce);
+            dialog.setVisible(true);
+            if (dialog.tracce!=null)
+                if (!dialog.tracce.isEmpty()){
+                    for (int i=0;i<dialog.tracce.size();i++){
+                        String trackNo = dialog.tracce.get(i).getNumber();
+                        for (int j=0;j<jList1.getModel().getSize();j++)
+                            if (jList1.getModel().getElementAt(j).toString().contains(trackNo)){
+                                it.albe.utils.IO.print(null,  dialog.tracce.get(i).getName());
+                                break;
+                            }
+                    }                        
+                }
+        } catch (IOException iOException) {
+        } catch (JDOMException ex) {
+            Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_compilaTitoliMenuItemActionPerformed
     private void mostraInfoTraccia(Track track) {
         int minuti = Integer.parseInt(track.getDuration()) / 60; 
         int secondi = Integer.parseInt(track.getDuration()) - (minuti*60);
@@ -835,6 +917,7 @@ public class Frame extends javax.swing.JFrame{
     private javax.swing.JMenuItem aboutItem;
     private javax.swing.JMenuItem aggiornaMenuItem;
     private javax.swing.JMenuItem aggiungiMenuItem;
+    private javax.swing.JMenuItem compilaTitoliMenuItem;
     private javax.swing.JMenuItem impostaCartellaMenuItem;
     private javax.swing.JMenuItem impostaPlayerMenuItem;
     private javax.swing.JMenu infoMenu;
