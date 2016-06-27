@@ -2,13 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 
-import static it.albe.JMusicMan.JMusicMan.document;
+import static it.albe.jmusicman.JMusicMan.document;
+import it.albe.jmusicman.Contatori;
 import it.albe.utils.IO;
+import it.albe.jmusicman.Style;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import static java.awt.Image.SCALE_DEFAULT;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -69,9 +72,9 @@ public class Frame extends javax.swing.JFrame{
         
         }
         initComponents();
+        jTree1.setCellRenderer(new it.albe.jmusicman.ArtistiCellRenderer());
         numerazione = 0;
         this.setLocation((Toolkit.getDefaultToolkit().getScreenSize().width)/2 - this.getWidth()/2, (Toolkit.getDefaultToolkit().getScreenSize().height)/2 - this.getHeight()/2);
-        
         jTree1.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         jTree1.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
 
@@ -133,6 +136,16 @@ public class Frame extends javax.swing.JFrame{
                 }
             }
         });
+        ImageIcon imageIcon = new ImageIcon(it.albe.jmusicman.JMusicMan.class.getResource("icons/refresh.png"));
+        Image image = imageIcon.getImage().getScaledInstance(30, 30, java.awt.Image.SCALE_DEFAULT);
+        
+        refreshButton.setIcon(new ImageIcon(image));
+        //refreshButton.setText("\nRicarica albero");
+        imageIcon = new ImageIcon(it.albe.jmusicman.JMusicMan.class.getResource("icons/tree.png"));
+        image = imageIcon.getImage().getScaledInstance(30, 30, java.awt.Image.SCALE_DEFAULT);
+        
+        aggiornaButton.setIcon(new ImageIcon(image));        
+        //aggiornaButton.setText("\nAggiorna libreria");
     }
 
     /**
@@ -163,6 +176,8 @@ public class Frame extends javax.swing.JFrame{
         labelPath = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
         textFieldCerca = new javax.swing.JTextField();
+        contatoriLabel = new javax.swing.JLabel();
+        aggiornaButton = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         libreriaMenu = new javax.swing.JMenu();
         aggiornaMenuItem = new javax.swing.JMenuItem();
@@ -192,8 +207,11 @@ public class Frame extends javax.swing.JFrame{
         setTitle("JMusicMan");
         setResizable(false);
 
+        jSplitPane1.setBackground(Style.backGroundColor);
         jSplitPane1.setDividerLocation(200);
+        jSplitPane1.setToolTipText("");
         jSplitPane1.setMinimumSize(new java.awt.Dimension(200, 250));
+        jSplitPane1.setOneTouchExpandable(true);
         jSplitPane1.setPreferredSize(new java.awt.Dimension(2, 324));
 
         jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -201,8 +219,11 @@ public class Frame extends javax.swing.JFrame{
         jScrollPane1.setAutoscrolls(true);
         jScrollPane1.setDoubleBuffered(true);
 
+        jTree1.setBackground(Style.backGroundColor);
+        jTree1.setForeground(Style.foreGroundColor);
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicManLibrary");
         jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
+        jTree1.setToolTipText("");
         jTree1.setAutoscrolls(true);
         jTree1.setMaximumSize(new java.awt.Dimension(107, 1000));
         jTree1.setPreferredSize(new java.awt.Dimension(107, 600));
@@ -211,6 +232,8 @@ public class Frame extends javax.swing.JFrame{
 
         jSplitPane1.setLeftComponent(jScrollPane1);
 
+        jList1.setBackground(Style.backGroundColor);
+        jList1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jList1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 Frame.this.mouseClicked(evt);
@@ -220,12 +243,13 @@ public class Frame extends javax.swing.JFrame{
 
         jSplitPane1.setRightComponent(jScrollPane2);
 
-        refreshButton.setText("R");
         refreshButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 refreshButtonActionPerformed(evt);
             }
         });
+
+        jPanel1.setBackground(Style.backGroundColor);
 
         labelArtista.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
         labelArtista.setText("Artista");
@@ -240,8 +264,9 @@ public class Frame extends javax.swing.JFrame{
         labelDuration.setText("0:00");
 
         labelPath.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
-        labelPath.setText("C:\\PercorsoFile");
+        labelPath.setText("<<Percorso_file>>");
 
+        jScrollPane4.setBackground(Style.backGroundColor);
         jScrollPane4.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jScrollPane4MouseClicked(evt);
@@ -255,14 +280,14 @@ public class Frame extends javax.swing.JFrame{
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(labelAlbum, javax.swing.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
                         .addComponent(labelArtista, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(labelTitolo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(labelDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(labelPath))
-                .addContainerGap(149, Short.MAX_VALUE))
+                .addContainerGap(137, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -278,12 +303,13 @@ public class Frame extends javax.swing.JFrame{
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labelPath)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(50, Short.MAX_VALUE))
         );
 
         jScrollPane3.setViewportView(jPanel1);
 
+        textFieldCerca.setBackground(Style.backGroundColor);
         textFieldCerca.setText("Cerca...");
         textFieldCerca.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
@@ -300,6 +326,18 @@ public class Frame extends javax.swing.JFrame{
                 textFieldCercaKeyTyped(evt);
             }
         });
+
+        contatoriLabel.setText("jLabel1");
+
+        aggiornaButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aggiornaButtonActionPerformed(evt);
+            }
+        });
+
+        jMenuBar1.setBackground(Style.backGroundColor);
+        jMenuBar1.setForeground(Style.foreGroundColor);
+        jMenuBar1.setToolTipText("");
 
         libreriaMenu.setText("Libreria");
         libreriaMenu.addActionListener(new java.awt.event.ActionListener() {
@@ -416,35 +454,42 @@ public class Frame extends javax.swing.JFrame{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 450, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, 327, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(refreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(2, 2, 2)
-                        .addComponent(jSplitPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addComponent(textFieldCerca))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(aggiornaButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(refreshButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(textFieldCerca, javax.swing.GroupLayout.DEFAULT_SIZE, 385, Short.MAX_VALUE)
+                    .addComponent(contatoriLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(refreshButton)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(textFieldCerca, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(9, 9, 9)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(refreshButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(aggiornaButton, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(contatoriLabel))
                 .addGap(6, 6, 6))
         );
 
@@ -452,7 +497,7 @@ public class Frame extends javax.swing.JFrame{
     }// </editor-fold>//GEN-END:initComponents
 
     private void aggiornaMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aggiornaMenuItemActionPerformed
-        JMusicMan.update();
+        JMusicMan.update(false,true);
     }//GEN-LAST:event_aggiornaMenuItemActionPerformed
 
     private void libreriaMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_libreriaMenuActionPerformed
@@ -840,18 +885,18 @@ public class Frame extends javax.swing.JFrame{
             return;
         }
         try {
-            /*
+            
             URLConnection con = url.openConnection();
             InputStream in = con.getInputStream();
             
             String encoding = con.getContentEncoding();
             
             encoding = encoding == null ? "UTF-8" : encoding;
-            */
+           
             SAXBuilder builder = new SAXBuilder(); 
             Document document;
-            //document = builder.build(in);
-            document = builder.build(new java.io.FileInputStream("C:\\Users\\Alberto\\Desktop\\download.xml"));
+            document = builder.build(in);
+            //document = builder.build(new java.io.FileInputStream("C:\\Users\\Alberto\\Desktop\\download.xml"));
             Element root = document.getRootElement();
             Element recordingList = (Element)root.getChildren().get(0);
             List<Track> tracce = new ArrayList<Track>();
@@ -877,18 +922,46 @@ public class Frame extends javax.swing.JFrame{
                 if (!dialog.tracce.isEmpty()){
                     for (int i=0;i<dialog.tracce.size();i++){
                         String trackNo = dialog.tracce.get(i).getNumber();
-                        for (int j=0;j<jList1.getModel().getSize();j++)
-                            if (jList1.getModel().getElementAt(j).toString().contains(trackNo)){
-                                it.albe.utils.IO.print(null,  dialog.tracce.get(i).getName());
-                                break;
+                        for (int j=0;j<jList1.getModel().getSize();j++){
+                            try{
+                                if (jList1.getModel().getElementAt(j).toString().contains(String.format("%02d",Integer.valueOf(trackNo)))){
+                                    /*Traccia trovata e modifico le informazioni*/
+                                    Track trackk = (Track)jList1.getModel().getElementAt(j);
+                                    trackk.setName(dialog.tracce.get(i).getName());
+                                    trackk.setTrack(String.format("%02d",Integer.valueOf(trackNo)));
+                                    try{
+                                        AudioFile audioFile = AudioFileIO.read(new File(trackk.getPath()));
+                                        Tag tag = audioFile.getTag();
+                                        tag.setField(FieldKey.TITLE,trackk.getName());
+                                        tag.setField(FieldKey.TRACK,trackk.getNumber());
+                                        audioFile.setTag(tag);
+                                        audioFile.commit();
+                                    }
+                                    catch(Exception e){
+                                        it.albe.utils.IO.err(this, "Si sono verificati alcuni errori");
+                                        System.out.print(e.getMessage());
+                                    }
+                                    break;
+                                }
                             }
-                    }                        
+                            catch (NumberFormatException ex){
+                                
+                            }
+                                
+                        }
+                    }     
+                    it.albe.jmusicman.JMusicMan.update(true,false);
                 }
         } catch (IOException iOException) {
         } catch (JDOMException ex) {
             Logger.getLogger(Frame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_compilaTitoliMenuItemActionPerformed
+
+    private void aggiornaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aggiornaButtonActionPerformed
+        it.albe.jmusicman.JMusicMan.update(false, true);
+    }//GEN-LAST:event_aggiornaButtonActionPerformed
+
     private void mostraInfoTraccia(Track track) {
         int minuti = Integer.parseInt(track.getDuration()) / 60; 
         int secondi = Integer.parseInt(track.getDuration()) - (minuti*60);
@@ -902,22 +975,26 @@ public class Frame extends javax.swing.JFrame{
                 recuperaCoverArt(track);
             if (track.getImg()==null){
                 jScrollPane4.setViewportView(null);
+                
                 return;
             }
                 
         }
         javax.swing.ImageIcon image = new javax.swing.ImageIcon(track.getImg());
-        image.setImage(image.getImage().getScaledInstance(jScrollPane4.getWidth(), jScrollPane4.getHeight(), SCALE_DEFAULT));
+        image.setImage(image.getImage().getScaledInstance(jScrollPane4.getWidth()-10, jScrollPane4.getHeight()-10, SCALE_DEFAULT));
         JLabel label = new JLabel(image);
+        label.setBackground(Style.backGroundColor);
         jScrollPane4.setViewportView(label);
             
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem aboutItem;
+    private javax.swing.JButton aggiornaButton;
     private javax.swing.JMenuItem aggiornaMenuItem;
     private javax.swing.JMenuItem aggiungiMenuItem;
     private javax.swing.JMenuItem compilaTitoliMenuItem;
+    private javax.swing.JLabel contatoriLabel;
     private javax.swing.JMenuItem impostaCartellaMenuItem;
     private javax.swing.JMenuItem impostaPlayerMenuItem;
     private javax.swing.JMenu infoMenu;
@@ -993,6 +1070,47 @@ public class Frame extends javax.swing.JFrame{
         if (tracceTrovate.size()==0)
             modello.addElement(new Track("", "Nessun risultato", "",""));
         jList1.setModel(modello);                
+    }
+
+    void aggiornaContatori() {
+        this.contatoriLabel.setText(String.format("%d artisti, %d album e %d brani per ", Contatori.artisti,Contatori.album,Contatori.brani));
+        String durata = "";
+        long resto = Contatori.durataTotale;
+        int anni,mesi, settimane,giorni,ore,minuti,secondi;
+        if (resto>0){
+            if ((resto/31536000)>0){
+                anni = (int) resto/31536000;
+                resto = Contatori.durataTotale - (anni*31536000);
+                durata += String.format("%d anni,", anni);   
+            }                
+            if ((resto/2592000)>0){
+                mesi = (int) resto/2592000;
+                resto = resto - (mesi*2592000);
+                durata += String.format("%d mesi,", mesi);   
+            }
+            if ((resto/604800)>0){
+                settimane = (int) resto/604800;
+                resto = resto - (settimane*604800);
+                durata += String.format("%d settimane,", settimane);   
+            }
+            if ((resto/86400)>0){
+                giorni = (int) resto/86400;
+                resto = resto - (giorni*86400);
+                durata += String.format("%d giorni,", giorni);   
+            }
+            if ((resto/3600)>0){
+                ore = (int) resto/3600;
+                resto = resto - (ore*3600);
+                durata += String.format("%d ore,", ore);   
+            }
+            if ((resto/60)>0){
+                minuti = (int) resto/60;
+                resto = resto - (minuti*60);
+                durata += String.format("%d minuti,", minuti);   
+            }
+            durata += String.format("%d secondi.",resto); 
+        }
+        this.contatoriLabel.setText(this.contatoriLabel.getText()+durata);
     }
 }
 

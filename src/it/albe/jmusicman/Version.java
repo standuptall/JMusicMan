@@ -1,4 +1,4 @@
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 
 public class Version {
 	private static final String VERSION;

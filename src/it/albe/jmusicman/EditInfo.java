@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 
 import java.awt.event.MouseEvent;
 import javax.swing.*;
@@ -119,13 +119,13 @@ public class EditInfo extends javax.swing.JDialog {
                 
                 @Override
                 public void mouseClicked(MouseEvent me) {
-                    if (me.getButton()==3)
-                        popup.show(label,me.getX(),me.getY());
+                    
                 }
 
                 @Override
                 public void mousePressed(MouseEvent me) {
-
+                     if (me.getButton()==3)
+                        popup.show(label,me.getX(),me.getY());   
 
 
                 }
@@ -147,7 +147,8 @@ public class EditInfo extends javax.swing.JDialog {
 
                 @Override
                 public void mouseDragged(MouseEvent me) {
-
+                    if (me.getButton()==3)
+                        popup.show(label,me.getX(),me.getY());
                 }
 
                 @Override
@@ -171,6 +172,84 @@ public class EditInfo extends javax.swing.JDialog {
         commentField.setEnabled(false);
         artistField.setText(tracks.get(0).getArtist());
         albumField.setText(tracks.get(0).getAlbum());
+        final JLabel label = new JLabel("");
+        java.awt.event.ActionListener menuListener = new java.awt.event.ActionListener() {
+
+                public void actionPerformed(java.awt.event.ActionEvent event) {
+                    if (event.getActionCommand().equals("Incolla")){
+                        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                        Transferable contents = clipboard.getContents(null);
+                        java.awt.Image image;
+                        try {
+                        if (contents!=null)
+                            if (contents.isDataFlavorSupported(DataFlavor.imageFlavor)){
+                                image = (java.awt.Image)contents.getTransferData(DataFlavor.imageFlavor);
+                                label.setIcon(new javax.swing.ImageIcon(image));
+                                jScrollPane2.setViewportView(label);
+                                BufferedImage bimage = (BufferedImage)image;
+                                java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream(); 
+                                javax.imageio.ImageIO.write(bimage, "png", baos); 
+                                byte[] res=baos.toByteArray();
+                                track.setImg(res);
+                                imageModified = true;
+                                for (Track tra : tracks)
+                                    tra.setImg(res);
+                            }
+                        }
+                        catch (Exception e){
+
+                        }
+                    }
+
+                }
+            };
+            
+            final JPopupMenu popup = new JPopupMenu();
+            JMenuItem item = new JMenuItem("Incolla");
+            item.addActionListener(menuListener);
+            popup.add(item);
+            label.addMouseListener(new javax.swing.event.MouseInputListener() {
+                
+                @Override
+                public void mouseClicked(MouseEvent me) {
+                    
+                }
+
+                @Override
+                public void mousePressed(MouseEvent me) {
+                     if (me.getButton()==3)
+                        popup.show(label,me.getX(),me.getY());   
+
+
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent me) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent me) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent me) {
+
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent me) {
+                    if (me.getButton()==3)
+                        popup.show(label,me.getX(),me.getY());
+                }
+
+                @Override
+                public void mouseMoved(MouseEvent me) {
+
+                }
+            });
+            jScrollPane2.setViewportView(label);
     }
     public EditResult editResult(){
         return new EditResult(artistModified, titleModified,albumModified,imageModified);
@@ -212,7 +291,7 @@ public class EditInfo extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Modifica informazioni");
-        setLocation(it.albe.JMusicMan.JMusicMan.frame.getLocation());
+        setLocation(it.albe.jmusicman.JMusicMan.frame.getLocation());
 
         jLabel1.setText("Artista");
 

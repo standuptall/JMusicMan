@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 import it.albe.utils.IO;
 import java.io.*;
 import java.util.Iterator;
@@ -55,12 +55,13 @@ public class JMusicMan {
         catch (FileNotFoundException ex) {
             Logger.getLogger(JMusicMan.class.getName()).log(Level.SEVERE, null, ex);
         } 
-        update();
+        //update();
     }
     /******************************************************************
      * Carica la libreria XML e crea l'albero directory               *
      ******************************************************************/
     public static void loadLibrary(){
+        it.albe.jmusicman.Contatori.azzera();
         SAXBuilder builder = new SAXBuilder();    
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicMan Library");
         treeNode1.removeAllChildren();
@@ -76,7 +77,7 @@ public class JMusicMan {
                         System.exit(0);
             else {
                 primaVolta = true;
-                update();
+                update(false,true);
                 return;
             }
             rootElement = document.getRootElement();
@@ -89,6 +90,7 @@ public class JMusicMan {
             List artists = library.getChildren();
             Iterator iterator = artists.iterator(); 
             while(iterator.hasNext()){
+                it.albe.jmusicman.Contatori.artisti++;
                 Element artist = (Element)iterator.next();
                 DefaultMutableTreeNode artistNode = new DefaultMutableTreeNode(artist.getAttributeValue("name"));
                 //Ordino alfabeticamente
@@ -102,6 +104,7 @@ public class JMusicMan {
                 List albums = artist.getChildren();
                 Iterator iterator2 = albums.iterator(); 
                 while(iterator2.hasNext()){
+                    it.albe.jmusicman.Contatori.album++;
                     Element album = (Element)iterator2.next();
                     DefaultMutableTreeNode albumNode = new DefaultMutableTreeNode(album.getAttributeValue("name"));
                     String albumName = (!"".equals(albumNode.toString())) ? albumNode.toString() : "Album senza nome";
@@ -110,17 +113,21 @@ public class JMusicMan {
                     List tracks = album.getChildren();
                     Iterator iterator3 = tracks.iterator();
                     while (iterator3.hasNext()){
+                        it.albe.jmusicman.Contatori.brani++;
                         Element track = (Element)iterator3.next();
                         Album alb = (Album)albumNode.getUserObject();
                         String number = (track.getChild("number")!=null) ? track.getChild("number").getText() : "";
                         String comment = (track.getChild("comment")!=null) ? track.getChild("comment").getText() : "";
                         Track traccia = new Track(artistNode.toString(),track.getChildText("name"),albumNode.toString(),track.getChildText("path"),number,comment);        
                         traccia.setDuration((track.getChild("duration")!=null) ? track.getChild("duration").getText() : "");
+                        if (track.getChild("duration")!=null)
+                            it.albe.jmusicman.Contatori.durataTotale += Integer.valueOf(traccia.getDuration());
                         alb.addTrack(traccia);
                     }
                     
                  }
              }
+            
             frame.jProgressBar1.setStringPainted(true);
             frame.jProgressBar1.setString("Pronto");
             File[] roots = File.listRoots();
@@ -136,12 +143,16 @@ public class JMusicMan {
             else 
                 frame.label.setText(JMusicMan.root.getAbsolutePath());
         }
+        catch (com.sun.org.apache.xerces.internal.impl.io.MalformedByteSequenceException e){
+            IO.err(frame, "Il file XML non è valido: "+e.toString());
+        }
         catch (Exception e){
             IO.err(frame, "Errore nel caricare la libreria: "+e.toString());
         }
 
         frame.jTree1.expandRow(0);
         frame.jTree1.setSize(frame.getSize().width, frame.jTree1.getRowCount()*frame.jTree1.getRowHeight());
+        frame.aggiornaContatori();
     }
     /************************************************************************************************
      * Trova le tracce da copiare sul dispositivo confrontando le librerie sul PC e sul dispositivo.*
@@ -232,7 +243,7 @@ public class JMusicMan {
      * 
      **************************************************************************************/
     
-    public static File organize(File file) throws it.albe.JMusicMan.ExistingSongException, CannotReadException, TagException, ReadOnlyFileException, InvalidAudioFrameException{
+    public static File organize(File file) throws it.albe.jmusicman.ExistingSongException, CannotReadException, TagException, ReadOnlyFileException, InvalidAudioFrameException{
         int i =0;
         boolean skippaCopiaFile = false;
         String title = "";
@@ -372,7 +383,7 @@ public class JMusicMan {
             rootElement.getChild("lastedit").setText(Long.toString(data.getTime()));
             XMLOutputter xmlOutput = new XMLOutputter();
             Format format = Format.getPrettyFormat();
-            format.setEncoding("UTF-8");
+            format.setEncoding("ISO-8859-1");
             xmlOutput.setFormat(format);
             document.setRootElement(rootElement);
             xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
@@ -385,15 +396,17 @@ public class JMusicMan {
     }
     /********************************************************************************************************
      * Trova tutti i files mp3 presenti nella cartella /Music del PC e li organizza nelle apposite cartelle,*
-     * ricreando pure il file XML. Risponde alla funzione "Aggiorna"                                                                           *
+     * ricreando pure il file XML. Risponde alla funzione "Aggiorna"   
+     * @param noshow true se non deve mostrare la progressbar e gli errori nella libreria
+     * @param async true se deve essere asincrono
      ********************************************************************************************************/
-    public static void update(){
+    public static void update(boolean noshow,boolean async){
         javax.swing.SwingWorker<Void,Void> sw = new javax.swing.SwingWorker<Void,Void>() {
 
             @Override
             protected Void doInBackground() throws Exception {
                 rootElement = new Element("JMusicManLibrary");
-                rootElement.setAttribute("version","0.1");
+                rootElement.setAttribute("version",Version.getVersion());
                 Element element = new Element("lastedit");
                 rootElement.addContent(element);
                 element = new Element("player");
@@ -415,10 +428,12 @@ public class JMusicMan {
                 frame.jProgressBar1.setStringPainted(true);
                 int i=0;
                 for (File file :files){
-                    frame.jProgressBar1.setString(file.getAbsolutePath());
-                    progress += step; 
-                    progressint = (int)progress;
-                    frame.jProgressBar1.setValue(progressint);
+                    if (!noshow){
+                        frame.jProgressBar1.setString(file.getAbsolutePath());
+                        progress += step; 
+                        progressint = (int)progress;
+                        frame.jProgressBar1.setValue(progressint);
+                    }
                     try {
                         AudioFile audioFile = AudioFileIO.read(file);
                         Tag tag = audioFile.getTag();
@@ -473,22 +488,31 @@ public class JMusicMan {
                         skippedTracks.add(file);
                     }                                            
                 }
-                if (skippedTracks.size()>0){
-                    it.albe.JMusicMan.SkippedTracksFrame skippedFrame = new it.albe.JMusicMan.SkippedTracksFrame(frame,skippedTracks);
+                if ((skippedTracks.size()>0)&&(!noshow)){
+                    it.albe.jmusicman.SkippedTracksFrame skippedFrame = new it.albe.jmusicman.SkippedTracksFrame(frame,skippedTracks);
                     skippedFrame.setVisible(true);
                 }
-                frame.jProgressBar1.setString("Pronto");
+                if (!noshow) 
+                    frame.jProgressBar1.setString("Pronto");
                 files = deleteEmptyDirectories(directory);
-                if (!files.isEmpty()){
-                    //it.albe.utils.IO("");
-                    it.albe.JMusicMan.NotEmptyDirectories dialog = new it.albe.JMusicMan.NotEmptyDirectories(frame,files);
-                    dialog.setVisible(true);
+                if (!noshow){
+                    if (!files.isEmpty()){
+                        //it.albe.utils.IO("");
+                        it.albe.jmusicman.NotEmptyDirectories dialog = new it.albe.jmusicman.NotEmptyDirectories(frame,files);
+                        dialog.setVisible(true);
+                    }
                 }
+                    
                 loadLibrary();
                 return null;
                 }
         };
         sw.execute();
+        if (!async)
+            while(true){
+                if (sw.isDone())
+                    break;
+            }
     }
     /******************************************************************************
      *    Aggiorna solo la traccia in questione, sapendo che sono stati modificati*

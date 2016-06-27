@@ -1,5 +1,5 @@
 
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 
 
 public class Track {

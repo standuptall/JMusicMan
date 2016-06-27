@@ -12,7 +12,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import it.albe.JMusicMan.Track;
+import it.albe.jmusicman.Track;
 import javax.swing.ListModel;
 
 /**

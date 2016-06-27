@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 
 import it.albe.utils.IO;
 import java.util.List;
@@ -366,7 +366,7 @@ public class SkippedTracksFrame extends javax.swing.JDialog {
             }
         }
         this.setVisible(false);
-        it.albe.JMusicMan.JMusicMan.update();
+        it.albe.jmusicman.JMusicMan.update(true,false);
         //image already handled in ActionListener, row 66
     }//GEN-LAST:event_OKBUtton1ActionPerformed
 

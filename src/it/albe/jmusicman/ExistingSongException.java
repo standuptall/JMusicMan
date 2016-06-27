@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package it.albe.JMusicMan;
+package it.albe.jmusicman;
 
 import org.jaudiotagger.audio.AudioFile;
 
