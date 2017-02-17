@@ -23,6 +23,7 @@ import org.jaudiotagger.tag.images.Artwork;
 public class EditInfo extends javax.swing.JDialog {
     private Track track;
     private List<Track> tracks;
+    private JList jList;
     private int response;
     public boolean multipleEdit;
     public boolean artistModified, titleModified, albumModified, imageModified, trackModified,commentModified;
@@ -30,8 +31,10 @@ public class EditInfo extends javax.swing.JDialog {
     /**
      * Creates new form EditInfo
      */
-    public EditInfo(java.awt.Frame parent, boolean modal, List<Track> tracks) {
+    public EditInfo(java.awt.Frame parent, boolean modal, JList jList1) {
         super(parent, modal);
+        jList = jList1;
+        tracks = jList1.getSelectedValuesList();
         this.addWindowStateListener(new java.awt.event.WindowStateListener() {
             @Override
             public void windowStateChanged(WindowEvent we) {
@@ -48,8 +51,11 @@ public class EditInfo extends javax.swing.JDialog {
         if (tracks.size()==1){
             editTrack(tracks.get(0));
         }
-        else
+        else{
             editTracks(tracks);
+            prossimoButton.setEnabled(false);
+            precedenteButton.setEnabled(false);
+        }
         
         
         
@@ -57,6 +63,14 @@ public class EditInfo extends javax.swing.JDialog {
     
     public void editTrack(final Track track){
         this.track = track;
+        if (jList.getSelectedIndex()+1==jList.getModel().getSize())
+            prossimoButton.setEnabled(false);
+        else
+            prossimoButton.setEnabled(true);
+        if (jList.getSelectedIndex()==0)
+            precedenteButton.setEnabled(false);
+        else
+            precedenteButton.setEnabled(true);
         artistField.setText(track.getArtist());
         albumField.setText(track.getAlbum());
         titleField.setText(track.getName());
@@ -288,12 +302,25 @@ public class EditInfo extends javax.swing.JDialog {
         OKBUtton = new javax.swing.JButton();
         annullaButton = new javax.swing.JButton();
         resetTagButton = new javax.swing.JButton();
+        prossimoButton = new javax.swing.JButton();
+        precedenteButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Modifica informazioni");
         setLocation(it.albe.jmusicman.JMusicMan.frame.getLocation());
 
         jLabel1.setText("Artista");
+
+        artistField.addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                artistFieldPropertyChange(evt);
+            }
+        });
+        artistField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                artistFieldKeyTyped(evt);
+            }
+        });
 
         jLabel2.setText("Titolo");
 
@@ -338,6 +365,20 @@ public class EditInfo extends javax.swing.JDialog {
             }
         });
 
+        prossimoButton.setText("Prossimo");
+        prossimoButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                prossimoButtonActionPerformed(evt);
+            }
+        });
+
+        precedenteButton.setText("Precedente");
+        precedenteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                precedenteButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -356,12 +397,12 @@ public class EditInfo extends javax.swing.JDialog {
                             .addComponent(jLabel3)
                             .addComponent(jLabel4)
                             .addComponent(jLabel5)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
+                            .addComponent(jScrollPane1))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 70, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel6)
-                                .addGap(0, 65, Short.MAX_VALUE))
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jScrollPane2))))
@@ -371,7 +412,10 @@ public class EditInfo extends javax.swing.JDialog {
                         .addComponent(resetTagButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(annullaButton, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                        .addComponent(precedenteButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(prossimoButton, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -397,7 +441,7 @@ public class EditInfo extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -406,7 +450,10 @@ public class EditInfo extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(OKBUtton)
                     .addComponent(resetTagButton)
-                    .addComponent(annullaButton)))
+                    .addComponent(annullaButton)
+                    .addComponent(prossimoButton)
+                    .addComponent(precedenteButton))
+                .addContainerGap())
         );
 
         pack();
@@ -481,6 +528,41 @@ public class EditInfo extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_resetTagButtonActionPerformed
 
+    private void artistFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_artistFieldKeyTyped
+        /*
+        char tasto = evt.getKeyChar();
+        evt.consume();
+        if (tasto<=32||tasto>=126)
+            return;
+        String cerca = this.artistField.getSelectedText()==null ? this.artistField.getText() : this.artistField.getText().substring(0, this.artistField.getText().length()-this.artistField.getSelectedText().length());
+        String suggest = it.albe.jmusicman.JMusicMan.jSuggest.suggest("Artista", cerca+tasto);
+        if (!suggest.equals("")){
+            int position = this.artistField.getCaretPosition()+1;
+            this.artistField.setText(suggest);
+            this.artistField.setCaretPosition(position);
+            evt.consume();
+            this.artistField.setSelectionStart(position);
+            this.artistField.setSelectionEnd(this.artistField.getText().length());
+        }
+        */
+    }//GEN-LAST:event_artistFieldKeyTyped
+
+    private void artistFieldPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_artistFieldPropertyChange
+        
+    }//GEN-LAST:event_artistFieldPropertyChange
+
+    private void prossimoButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prossimoButtonActionPerformed
+        jList.setSelectedIndex(jList.getSelectedIndex()+1);
+        tracks =  jList.getSelectedValuesList();
+        editTrack(tracks.get(0));
+    }//GEN-LAST:event_prossimoButtonActionPerformed
+
+    private void precedenteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_precedenteButtonActionPerformed
+        jList.setSelectedIndex(jList.getSelectedIndex()-1);
+        tracks =  jList.getSelectedValuesList();
+        editTrack(tracks.get(0));
+    }//GEN-LAST:event_precedenteButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -499,6 +581,8 @@ public class EditInfo extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton precedenteButton;
+    private javax.swing.JButton prossimoButton;
     private javax.swing.JButton resetTagButton;
     private javax.swing.JTextField titleField;
     private javax.swing.JTextField trackNumberField;

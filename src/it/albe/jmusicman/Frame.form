@@ -62,6 +62,9 @@
               <Properties>
                 <Property name="text" type="java.lang.String" value="Imposta cartella"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="impostaCartellaMenuItemActionPerformed"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -235,7 +238,7 @@
         <Property name="background" type="java.awt.Color" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Style.backGroundColor" type="code"/>
         </Property>
-        <Property name="dividerLocation" type="int" value="200"/>
+        <Property name="dividerLocation" type="int" value="250"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[200, 250]"/>

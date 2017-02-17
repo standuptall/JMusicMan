@@ -16,6 +16,8 @@ import static java.awt.Image.SCALE_DEFAULT;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
@@ -136,12 +138,28 @@ public class Frame extends javax.swing.JFrame{
                 }
             }
         });
-        ImageIcon imageIcon = new ImageIcon(it.albe.jmusicman.JMusicMan.class.getResource("icons/refresh.png"));
+        jList1.addKeyListener(new KeyListener(){@Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    numerazione = 0;
+                    jTree1.setEnabled(true);
+                    textFieldCerca.setEnabled(true);
+                    iniziaNumerazioneMenuItem.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) { }
+
+            @Override
+            public void keyTyped(KeyEvent e) { }
+        });
+        ImageIcon imageIcon = new ImageIcon(it.albe.jmusicman.JMusicMan.class.getResource("icons/tree.png"));
         Image image = imageIcon.getImage().getScaledInstance(30, 30, java.awt.Image.SCALE_DEFAULT);
         
         refreshButton.setIcon(new ImageIcon(image));
         //refreshButton.setText("\nRicarica albero");
-        imageIcon = new ImageIcon(it.albe.jmusicman.JMusicMan.class.getResource("icons/tree.png"));
+        imageIcon = new ImageIcon(it.albe.jmusicman.JMusicMan.class.getResource("icons/refresh.png"));
         image = imageIcon.getImage().getScaledInstance(30, 30, java.awt.Image.SCALE_DEFAULT);
         
         aggiornaButton.setIcon(new ImageIcon(image));        
@@ -208,7 +226,7 @@ public class Frame extends javax.swing.JFrame{
         setResizable(false);
 
         jSplitPane1.setBackground(Style.backGroundColor);
-        jSplitPane1.setDividerLocation(200);
+        jSplitPane1.setDividerLocation(250);
         jSplitPane1.setToolTipText("");
         jSplitPane1.setMinimumSize(new java.awt.Dimension(200, 250));
         jSplitPane1.setOneTouchExpandable(true);
@@ -366,6 +384,11 @@ public class Frame extends javax.swing.JFrame{
         libreriaMenu.add(impostaPlayerMenuItem);
 
         impostaCartellaMenuItem.setText("Imposta cartella");
+        impostaCartellaMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                impostaCartellaMenuItemActionPerformed(evt);
+            }
+        });
         libreriaMenu.add(impostaCartellaMenuItem);
 
         jMenuBar1.add(libreriaMenu);
@@ -633,7 +656,7 @@ public class Frame extends javax.swing.JFrame{
      * Evento appartenente al menù contestuale della lista
      */
     private void modificaPopumMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modificaPopumMenuActionPerformed
-        EditInfo dialog = new EditInfo(this,true,jList1.getSelectedValuesList());
+        EditInfo dialog = new EditInfo(this,true,jList1);
         dialog.setVisible(true);
         if (dialog.getResponse()==1){   //se hai premuto OK...
             for (int i=0;i<dialog.getTracks().size();i++)
@@ -961,6 +984,20 @@ public class Frame extends javax.swing.JFrame{
     private void aggiornaButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aggiornaButtonActionPerformed
         it.albe.jmusicman.JMusicMan.update(false, true);
     }//GEN-LAST:event_aggiornaButtonActionPerformed
+
+    private void impostaCartellaMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_impostaCartellaMenuItemActionPerformed
+        /* viene selezionata automaticamente la modalità organizza libreria (per es. hard disk*/
+        JMusicMan.modalitaorganizza = true;
+        javax.swing.JFileChooser fchooser = new javax.swing.JFileChooser();
+        fchooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        int sc = fchooser.showOpenDialog(this);
+        if (sc==javax.swing.JFileChooser.APPROVE_OPTION)
+            JMusicMan.directory = fchooser.getSelectedFile().getAbsolutePath();
+        if (JMusicMan.directory.charAt(JMusicMan.directory.length()-1)!='\\')
+            JMusicMan.directory += "//";
+        JMusicMan.update(false, true);
+        JMusicMan.loadLibrary();
+    }//GEN-LAST:event_impostaCartellaMenuItemActionPerformed
 
     private void mostraInfoTraccia(Track track) {
         int minuti = Integer.parseInt(track.getDuration()) / 60; 

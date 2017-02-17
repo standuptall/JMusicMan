@@ -3,7 +3,9 @@
  * and open the template in the editor.
  */
 package it.albe.jmusicman;
+import it.albe.utils.DataTable;
 import it.albe.utils.IO;
+import it.albe.utils.JSuggest;
 import java.io.*;
 import java.util.Iterator;
 import java.util.List;
@@ -40,13 +42,15 @@ public class JMusicMan {
     public static String playerDir; //directory del player
     public static Frame frame;
     public static boolean primaVolta = false;
+    public static JSuggest jSuggest;
+    public static boolean modalitaorganizza = false; //non crea xml, mette gli album nella stessa directory di "directory" 
     public static void main(String[] args) {
         PrintStream out = null;        
         playerDir = "";
         root = null;
         frame = new Frame();
         frame.setVisible(true);
-        loadLibrary();        
+        jSuggest = null;
         Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF);
         try {
             out = new PrintStream(new FileOutputStream(directory+"error.log"));        
@@ -55,19 +59,28 @@ public class JMusicMan {
         catch (FileNotFoundException ex) {
             Logger.getLogger(JMusicMan.class.getName()).log(Level.SEVERE, null, ex);
         } 
+        loadLibrary(); 
         //update();
     }
     /******************************************************************
      * Carica la libreria XML e crea l'albero directory               *
      ******************************************************************/
     public static void loadLibrary(){
+        if (JMusicMan.modalitaorganizza)
+            return;
+        List<File> files = deleteEmptyDirectories(directory);
+        if (!files.isEmpty()){
+            //it.albe.utils.IO("");
+            it.albe.jmusicman.NotEmptyDirectories dialog = new it.albe.jmusicman.NotEmptyDirectories(frame,files);
+            dialog.setVisible(true);
+        }
+        DataTable dataTableSuggest = new DataTable(new String[]{"Artista","Album","Titolo"});
         it.albe.jmusicman.Contatori.azzera();
         SAXBuilder builder = new SAXBuilder();    
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("JMusicMan Library");
-        treeNode1.removeAllChildren();
-        frame.jTree1.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-        
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)frame.jTree1.getModel().getRoot();
+        treeNode1.removeAllChildren(); 
+        TreeModel treeModel = new javax.swing.tree.DefaultTreeModel(treeNode1);
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode)treeModel.getRoot();
         try{
             File libraryFile = new File (directory+"JMusicManLibrary.xml");
             if (libraryFile.exists())
@@ -123,6 +136,7 @@ public class JMusicMan {
                         if (track.getChild("duration")!=null)
                             it.albe.jmusicman.Contatori.durataTotale += Integer.valueOf(traccia.getDuration());
                         alb.addTrack(traccia);
+                        dataTableSuggest.addRow(new String[]{artistNode.toString(),albumNode.toString(),track.getChildText("name")});
                     }
                     
                  }
@@ -149,10 +163,12 @@ public class JMusicMan {
         catch (Exception e){
             IO.err(frame, "Errore nel caricare la libreria: "+e.toString());
         }
-
         frame.jTree1.expandRow(0);
         frame.jTree1.setSize(frame.getSize().width, frame.jTree1.getRowCount()*frame.jTree1.getRowHeight());
-        frame.aggiornaContatori();
+        frame.aggiornaContatori();  
+        frame.jTree1.setModel(treeModel);
+        frame.jTree1.updateUI();
+        jSuggest = new JSuggest(dataTableSuggest);
     }
     /************************************************************************************************
      * Trova le tracce da copiare sul dispositivo confrontando le librerie sul PC e sul dispositivo.*
@@ -244,6 +260,9 @@ public class JMusicMan {
      **************************************************************************************/
     
     public static File organize(File file) throws it.albe.jmusicman.ExistingSongException, CannotReadException, TagException, ReadOnlyFileException, InvalidAudioFrameException{
+        String directory_bak = JMusicMan.directory;
+        if (JMusicMan.modalitaorganizza)
+            JMusicMan.directory = JMusicMan.directory.substring(0, JMusicMan.directory.lastIndexOf('\\')+1);
         int i =0;
         boolean skippaCopiaFile = false;
         String title = "";
@@ -259,6 +278,11 @@ public class JMusicMan {
         catch (Exception e) {
             return file;
         }
+        finally{
+            JMusicMan.directory = directory_bak;
+        }
+        if (JMusicMan.modalitaorganizza)
+            JMusicMan.directory = JMusicMan.directory.substring(0, JMusicMan.directory.lastIndexOf('\\')+1);
         Tag tag = af.getTag();
         title = (tag.getFirst(FieldKey.TITLE)!=null) ? tag.getFirst(FieldKey.TITLE) : "";
         artist = (tag.getFirst(FieldKey.ARTIST)!=null) ? tag.getFirst(FieldKey.ARTIST) : "";
@@ -273,8 +297,12 @@ public class JMusicMan {
         catch(Exception e){
             
         }
+        finally{
+            JMusicMan.directory = directory_bak;
+        }
    
-        
+        if (modalitaorganizza)
+            JMusicMan.directory = JMusicMan.directory.substring(0, JMusicMan.directory.lastIndexOf('\\')+1);
         if (artist.equals("")) artist=  "Sconosciuto";
         if (title.equals("")) title= file.getName().substring(0,file.getName().length()-4);
         String fileTitle;
@@ -316,7 +344,11 @@ public class JMusicMan {
         catch(IOException e){
             return file;
         }
-        
+        finally{
+            JMusicMan.directory = directory_bak;
+        }
+        if (JMusicMan.modalitaorganizza)
+            JMusicMan.directory = JMusicMan.directory.substring(0, JMusicMan.directory.lastIndexOf('\\')+1);
         try{
             List artists =rootElement.getChild("library").getChildren();
             Iterator iterator = artists.iterator();
@@ -390,6 +422,9 @@ public class JMusicMan {
         }
         catch(IOException e){
             return file;
+        }
+        finally{
+            JMusicMan.directory = directory_bak;
         }
         return null;
         //loadLibrary();
@@ -494,14 +529,7 @@ public class JMusicMan {
                 }
                 if (!noshow) 
                     frame.jProgressBar1.setString("Pronto");
-                files = deleteEmptyDirectories(directory);
-                if (!noshow){
-                    if (!files.isEmpty()){
-                        //it.albe.utils.IO("");
-                        it.albe.jmusicman.NotEmptyDirectories dialog = new it.albe.jmusicman.NotEmptyDirectories(frame,files);
-                        dialog.setVisible(true);
-                    }
-                }
+                
                     
                 loadLibrary();
                 return null;
@@ -546,7 +574,8 @@ public class JMusicMan {
                 format.setEncoding("UTF-8");
                 xmlOutput.setFormat(format);
                 document.setRootElement(rootElement);
-                xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
+                if (!JMusicMan.modalitaorganizza)
+                    xmlOutput.output(document,new FileWriter(directory+"JMusicManLibrary.xml"));
                 int  c=0;
                 loadLibrary();
             }
@@ -712,11 +741,13 @@ public class JMusicMan {
      *********************************************************************************************************/
     public static ArrayList<File> deleteEmptyDirectories(String dir){
         boolean onlyAudio = false;
-        boolean onlyOther = false;
+        boolean Other = false;
+        boolean isdir = false;
         ArrayList<String> list = new ArrayList<String>();
         File dirFile = new File (dir);
         File[] filesAndDirectories = null;
         ArrayList<File> files = new ArrayList<File>();
+        File[] controllo;
         if (dirFile.isDirectory()){
             filesAndDirectories = dirFile.listFiles();
             for (int i=0;i<filesAndDirectories.length;i++){
@@ -727,24 +758,32 @@ public class JMusicMan {
                         files.addAll(deleteEmptyDirectories(filesAndDirectories[i].getAbsolutePath()));
                 }
                 else {
-                    if (!(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".MP3"))&&
-                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".FLAC"))&&
-                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".XML"))&&
-                        !(filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".INI"))){
-                        onlyOther = true;
-                    }
-                    else {
-                        onlyAudio = true;
-                    }
-                        
+                    if ((filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".MP3"))||
+                        (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".FLAC"))||
+                        (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".XML"))||
+                        (filesAndDirectories[i].getAbsolutePath().toUpperCase().endsWith(".INI")))
+                        continue;
+                    
+                    Other = true;
+                    
                 }
-                             
+                        
             }
-            if ((!onlyAudio)&&(onlyOther)){
-                files.add(dirFile);
+            if ((Other)){
+                //controllo che non ci siano file audio
+                controllo = dirFile.listFiles();
+                for (int k=0; k< controllo.length;k++){
+                    if ((filesAndDirectories[k].getAbsolutePath().toUpperCase().endsWith(".MP3"))||
+                        (filesAndDirectories[k].getAbsolutePath().toUpperCase().endsWith(".FLAC")))
+                        onlyAudio = true;
+                    if (filesAndDirectories[k].isDirectory())
+                        isdir = true;
+                }
+                if ((!onlyAudio)&&(!isdir))
+                    files.add(dirFile);
                 onlyAudio=false;
-                onlyOther=false;
-            }   
+                Other=false;
+            }              
         }
         return files;
     }

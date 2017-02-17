@@ -41,13 +41,13 @@
                           <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
-                          <Component id="jScrollPane1" alignment="0" pref="203" max="32767" attributes="0"/>
+                          <Component id="jScrollPane1" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <EmptySpace pref="70" max="32767" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                               <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="65" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
@@ -61,7 +61,10 @@
                       <Component id="resetTagButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="annullaButton" min="-2" pref="75" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <EmptySpace pref="57" max="32767" attributes="0"/>
+                      <Component id="precedenteButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="prossimoButton" min="-2" pref="75" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -91,7 +94,7 @@
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" pref="130" max="32767" attributes="0"/>
+                      <Component id="jScrollPane1" pref="121" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
@@ -104,7 +107,10 @@
                   <Component id="OKBUtton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="resetTagButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="annullaButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="prossimoButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="precedenteButton" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -116,6 +122,10 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="artistField">
+      <Events>
+        <EventHandler event="propertyChange" listener="java.beans.PropertyChangeListener" parameters="java.beans.PropertyChangeEvent" handler="artistFieldPropertyChange"/>
+        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="artistFieldKeyTyped"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
@@ -194,6 +204,22 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="resetTagButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="prossimoButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Prossimo"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="prossimoButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="precedenteButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Precedente"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="precedenteButtonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>
